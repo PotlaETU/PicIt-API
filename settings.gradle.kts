@@ -1,1 +1,1 @@
-rootProject.name = "iam"
+rootProject.name = "picit-api"

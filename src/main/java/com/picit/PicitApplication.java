@@ -1,15 +1,14 @@
-package com.picit.iam;
+package com.picit;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
-@EnableDiscoveryClient
-public class IamApplication {
+public class PicitApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(IamApplication.class, args);
+        SpringApplication.run(PicitApplication.class, args);
     }
 
 }
