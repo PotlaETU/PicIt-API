@@ -1,7 +1,36 @@
 package com.picit.iam.services;
 
+import com.picit.iam.dto.SignUpRequest;
+import com.picit.iam.mapper.UserMapper;
+import com.picit.iam.model.Settings;
+import com.picit.iam.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class IamService {
+
+    private final UserRepository userRepository;
+
+    private final UserMapper userMapper;
+
+    public void signUp(SignUpRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.username())) {
+            throw new RuntimeException("Username already exists");
+        }
+        String privacy;
+        if (signUpRequest.privacy()) {
+            privacy = "public";
+        } else {
+            privacy = "private";
+        }
+        var settings = Settings.builder()
+                .privacy(privacy)
+                .notifications(signUpRequest.notifications())
+                .build();
+        var user = userMapper.toUser(signUpRequest, settings);
+        //TODO: hash password and authenticate user
+        userRepository.save(user);
+    }
 }
