@@ -3,8 +3,12 @@ package com.picit.iam.model;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @Document(collection = "user")
@@ -12,7 +16,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @AllArgsConstructor
-public class User {
+public class User implements UserDetails {
 
     @Id
     private String id;
@@ -36,4 +40,10 @@ public class User {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
 }

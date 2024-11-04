@@ -6,4 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface UserRepository extends MongoRepository<User, String> {
     boolean existsByUsername(@NotBlank(message = "Username is required") String username);
+
+    User findByUsername(@NotBlank(message = "Username is required") String username);
 }
