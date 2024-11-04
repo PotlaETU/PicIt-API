@@ -1,6 +1,9 @@
 spring:
   application:
     name: picit-api
+  data:
+    mongodb:
+      database: PicIt
 
 server:
   port: 8081
