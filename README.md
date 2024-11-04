@@ -1,3 +1,3 @@
-# IAM
+# PicIt API
 
-Micro-service for managing users.
+API that hadles all the back-end for the PicIt social network
