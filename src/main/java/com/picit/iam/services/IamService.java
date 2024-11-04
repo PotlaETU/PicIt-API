@@ -19,17 +19,15 @@ public class IamService {
         if (userRepository.existsByUsername(signUpRequest.username())) {
             throw new RuntimeException("Username already exists");
         }
-        String privacy;
+
+        var user = userMapper.toUser(signUpRequest);
+        user.getSettings().setNotifications(signUpRequest.notifications());
         if (signUpRequest.privacy()) {
-            privacy = "public";
+            user.getSettings().setPrivacy("public");
         } else {
-            privacy = "private";
+            user.getSettings().setPrivacy("private");
         }
-        var settings = Settings.builder()
-                .privacy(privacy)
-                .notifications(signUpRequest.notifications())
-                .build();
-        var user = userMapper.toUser(signUpRequest, settings);
+
         //TODO: hash password and authenticate user
         userRepository.save(user);
     }
