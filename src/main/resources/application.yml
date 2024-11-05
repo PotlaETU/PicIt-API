@@ -14,5 +14,5 @@ server:
 security:
   jwt:
     secret-key: ${JWT_SECRET_KEY:secret-key}
-    expiration-time: ${JWT_EXPIRATION_TIME:60000}
-    refresh-time: ${JWT_REFRESH_TIME:2000000}
+    expiration-time: 86400000 # 1 day in milliseconds
+    refresh-time: 604800000 # 1 week in milliseconds

@@ -21,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Date;
 
@@ -106,17 +107,22 @@ public class IamService {
         String refreshToken = tokenRefreshRequest.refreshToken();
         String username = jwtUtil.extractUsername(refreshToken);
 
-        User authUser = userRepository.findByUsername(username);
-        if (jwtUtil.isTokenValid(refreshToken, authUser)) {
-            String newAccessToken = jwtUtil.generateToken(authUser);
-            var loginResponse = LoginResponse.builder()
-                    .token(newAccessToken)
-                    .refreshToken(refreshToken)
-                    .build();
-            return ResponseEntity.ok(loginResponse);
-        } else {
+        User user = userRepository.findByUsername(username);
+        if (user == null || !refreshToken.equals(user.getRefreshToken()) || jwtUtil.isTokenExpired(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
+
+        String newAccessToken = jwtUtil.generateToken(user);
+        String newRefreshToken = jwtUtil.generateRefreshToken(user);
+        user.setRefreshToken(newRefreshToken);
+        userRepository.save(user);
+
+        var loginResponse = LoginResponse.builder()
+                .token(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+
+        return ResponseEntity.ok(loginResponse);
     }
 
     public ResponseEntity<Void> logout(HttpServletRequest request) {
@@ -135,6 +141,6 @@ public class IamService {
 
         authUser.setRefreshToken(null);
         userRepository.save(authUser);
+
         return ResponseEntity.ok().build();
-    }
-}
+    }}

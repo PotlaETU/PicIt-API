@@ -29,7 +29,7 @@ public class IamController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody TokenRefreshRequest tokenRefreshRequest) {
+    public ResponseEntity<LoginResponse> refresh(@RequestBody TokenRefreshRequest tokenRefreshRequest) {
         return iamService.refresh(tokenRefreshRequest);
     }
 

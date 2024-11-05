@@ -44,6 +44,7 @@ public class WebSecurityConfig {
                         request -> {
                             request.requestMatchers(HttpMethod.POST, "/api/v1/iam/register").permitAll();
                             request.requestMatchers(HttpMethod.POST, "/api/v1/iam/login").permitAll();
+                            request.requestMatchers(HttpMethod.POST, "/api/v1/iam/refresh").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/actuator/health").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll();
@@ -59,13 +60,7 @@ public class WebSecurityConfig {
                         exceptionHandling -> exceptionHandling.authenticationEntryPoint(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
                         )
-                )
-                .logout(l -> {
-                    l.logoutUrl("/api/v1/iam/logout");
-                    l.logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) ->
-                            SecurityContextHolder.clearContext());
-                })
-        ;
+                );
         return http.build();
     }
 
