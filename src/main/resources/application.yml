@@ -1,4 +1,7 @@
 spring:
+  profiles:
+    active: env
+
   application:
     name: picit-api
   data:
@@ -10,5 +13,6 @@ server:
 
 security:
   jwt:
-    secret-key: db7f3b5a27d394dc6dcbf3a7b1bfa2f322f5472fca45e01fcf45db21485cdc24
-    expiration-time: 3600000
+    secret-key: ${JWT_SECRET_KEY:secret-key}
+    expiration-time: ${JWT_EXPIRATION_TIME:60000}
+    refresh-time: ${JWT_REFRESH_TIME:2000000}
