@@ -1,7 +1,7 @@
 package com.picit.message.repository;
 
-import org.springframework.stereotype.Repository;
+import com.picit.message.entity.Message;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-@Repository("messageRepository")
-public interface MessageRepository {
+public interface MessageRepository extends MongoRepository<Message, String> {
 }
