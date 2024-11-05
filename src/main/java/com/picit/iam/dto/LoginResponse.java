@@ -6,9 +6,8 @@ import lombok.Builder;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record LoginResponse(
-        String token,
+        TokenResponse token,
         String expiration,
-        String refreshToken,
         String username,
         String email
 ) {
