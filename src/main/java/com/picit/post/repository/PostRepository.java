@@ -1,4 +1,7 @@
 package com.picit.post.repository;
 
-public interface PostRepository {
+import com.picit.post.entity.Post;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface PostRepository extends MongoRepository<Post, String> {
 }

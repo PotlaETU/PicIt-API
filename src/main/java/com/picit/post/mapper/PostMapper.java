@@ -1,14 +1,12 @@
 package com.picit.post.mapper;
 
 import com.picit.post.dto.PostDto;
-import com.picit.post.model.Post;
+import com.picit.post.entity.Post;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface PostMapper {
-    PostMapper INSTANCE = Mappers.getMapper(PostMapper.class);
+    Post postDtoToPost(PostDto postDto);
 
-    Post postDtoToPost(PostDto postDto);;
     PostDto postToPostDto(Post post);
 }

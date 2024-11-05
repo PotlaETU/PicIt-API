@@ -1,6 +1,5 @@
-package com.picit.post.model;
+package com.picit.post.entity;
 
-import com.picit.post.entity.Comment;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,6 +18,5 @@ public class Post {
     private List<Comment> comments;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 
 }
