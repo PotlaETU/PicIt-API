@@ -4,6 +4,7 @@ import com.picit.iam.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -19,15 +20,15 @@ public class JwtUtil {
     @Value("${security.jwt.secret-key}")
     private String secret;
 
+    @Getter
     @Value("${security.jwt.expiration-time}")
     private long expirationTime;
 
-    private final String TOKEN_HEADER = "Authorization";
-    private final String TOKEN_PREFIX = "Bearer ";
+    @Value("${security.jwt.refresh-time}")
+    private long refreshTime;
 
     private SecretKey getSignInKey() {
-        byte[] bytes = Base64.getDecoder()
-                .decode(secret.getBytes(StandardCharsets.UTF_8));
+        byte[] bytes = Base64.getDecoder().decode(secret);
         return Keys.hmacShaKeyFor(bytes);
     }
 
@@ -39,15 +40,42 @@ public class JwtUtil {
                 .getPayload();
     }
 
+    public String generateRefreshToken(User user) {
+        return Jwts.builder()
+                .claim("username", user.getUsername())
+                .claim("email", user.getEmail())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + refreshTime))
+                .signWith(getSignInKey())
+                .compact();
+    }
+
     public String generateToken(User user) {
         return Jwts.builder()
                 .claim("username", user.getUsername())
                 .claim("email", user.getEmail())
-                //TODO: Add more claims
                 .subject(user.getId())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1200))
+                .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSignInKey())
                 .compact();
     }
+
+    public boolean isTokenValid(String token, UserDetails user) {
+        try {
+            String username = extractUsername(token);
+            return (username.equals(user.getUsername()) && !isTokenExpired(token));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractAllClaims(token).getExpiration().before(new Date());
+    }
+
+    public String extractUsername(String token) {
+        return extractAllClaims(token).get("username", String.class);
+    }
+
 }
