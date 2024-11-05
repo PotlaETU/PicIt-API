@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -77,4 +78,11 @@ public class JwtUtil {
         return extractAllClaims(token).get("username", String.class);
     }
 
+    public ResponseCookie getCleanJwtCookie() {
+        return ResponseCookie.from("jwt", "")
+                .maxAge(0)
+                .httpOnly(true)
+                .path("/")
+                .build();
+    }
 }

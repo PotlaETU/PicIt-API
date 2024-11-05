@@ -1,19 +1,18 @@
 package com.picit.iam.services;
 
 import com.picit.iam.auth.JwtUtil;
-import com.picit.iam.dto.LoginRequest;
-import com.picit.iam.dto.LoginResponse;
-import com.picit.iam.dto.SignUpRequest;
-import com.picit.iam.dto.TokenRefreshRequest;
-import com.picit.iam.mapper.UserMapper;
+import com.picit.iam.dto.*;
 import com.picit.iam.entity.Settings;
 import com.picit.iam.entity.User;
+import com.picit.iam.mapper.UserMapper;
 import com.picit.iam.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,14 +54,18 @@ public class IamService {
         String token = jwtUtil.generateToken(user);
 
         var loginResponse = LoginResponse.builder()
-                .token(token)
+                .token(
+                        TokenResponse.builder()
+                                .token(token)
+                                .refreshToken(user.getRefreshToken())
+                                .build()
+                )
                 .expiration(Date.from(new Date()
                                 .toInstant()
                                 .plusMillis(jwtUtil.getExpirationTime()))
                         .toString())
                 .email(user.getEmail())
                 .username(user.getUsername())
-                .refreshToken(user.getRefreshToken())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(loginResponse);
     }
@@ -88,20 +91,24 @@ public class IamService {
         }
 
         var loginResponse = LoginResponse.builder()
-                .token(token)
+                .token(
+                        TokenResponse.builder()
+                                .token(token)
+                                .refreshToken(refreshToken)
+                                .build()
+                )
                 .expiration(Date.from(new Date()
                                 .toInstant()
                                 .plusMillis(jwtUtil.getExpirationTime()))
                         .toString())
                 .email(authUser.getEmail())
                 .username(authUser.getUsername())
-                .refreshToken(refreshToken)
                 .build();
         logger.info("Login response generated for username: {}", loginRequest.username());
         return ResponseEntity.ok(loginResponse);
     }
 
-    public ResponseEntity<LoginResponse> refresh(TokenRefreshRequest tokenRefreshRequest) {
+    public ResponseEntity<TokenResponse> refresh(TokenRefreshRequest tokenRefreshRequest) {
         String refreshToken = tokenRefreshRequest.refreshToken();
         String username = jwtUtil.extractUsername(refreshToken);
 
@@ -115,11 +122,10 @@ public class IamService {
         user.setRefreshToken(newRefreshToken);
         userRepository.save(user);
 
-        var loginResponse = LoginResponse.builder()
+        var loginResponse = TokenResponse.builder()
                 .token(newAccessToken)
                 .refreshToken(newRefreshToken)
                 .build();
-
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -140,5 +146,9 @@ public class IamService {
         authUser.setRefreshToken(null);
         userRepository.save(authUser);
 
-        return ResponseEntity.ok().build();
-    }}
+        ResponseCookie cookie = jwtUtil.getCleanJwtCookie();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
+
+    }
+}
