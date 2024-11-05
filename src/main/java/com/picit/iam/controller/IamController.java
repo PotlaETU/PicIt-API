@@ -1,12 +1,13 @@
 package com.picit.iam.controller;
 
 import com.picit.iam.dto.LoginRequest;
+import com.picit.iam.dto.LoginResponse;
 import com.picit.iam.dto.SignUpRequest;
+import com.picit.iam.dto.TokenRefreshRequest;
 import com.picit.iam.services.IamService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,19 +19,27 @@ public class IamController {
     private final IamService iamService;
 
     @PostMapping("/register")
-    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
-        this.iamService.signUp(signUpRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<LoginResponse> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        return iamService.signUp(signUpRequest);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
-        String token = iamService.login(loginRequest);
-        return ResponseEntity.ok().body(token);
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return iamService.login(loginRequest);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody TokenRefreshRequest tokenRefreshRequest) {
+        return iamService.refresh(tokenRefreshRequest);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Void> getMe() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> getMe() {
+        return ResponseEntity.ok("c'est bon tu es connecté");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        return iamService.logout(request);
     }
 }
