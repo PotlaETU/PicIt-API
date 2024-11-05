@@ -6,11 +6,10 @@ import com.picit.iam.dto.LoginResponse;
 import com.picit.iam.dto.SignUpRequest;
 import com.picit.iam.dto.TokenRefreshRequest;
 import com.picit.iam.mapper.UserMapper;
-import com.picit.iam.model.Settings;
-import com.picit.iam.model.User;
+import com.picit.iam.entity.Settings;
+import com.picit.iam.entity.User;
 import com.picit.iam.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Date;
 

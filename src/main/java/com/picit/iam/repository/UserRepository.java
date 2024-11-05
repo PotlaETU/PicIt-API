@@ -1,6 +1,6 @@
 package com.picit.iam.repository;
 
-import com.picit.iam.model.User;
+import com.picit.iam.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.mongodb.repository.MongoRepository;

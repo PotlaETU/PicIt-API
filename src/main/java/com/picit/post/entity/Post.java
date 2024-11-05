@@ -1,13 +1,17 @@
 package com.picit.post.model;
 
 import com.picit.post.entity.Comment;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Document(collection = "posts")
 public class Post {
-    private UUID id;
+    @Id
+    private String id;
     private String username;
     private String content;
     private String photoUrl;

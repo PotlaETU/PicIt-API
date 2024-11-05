@@ -1,6 +1,6 @@
 package com.picit.iam.dto;
 
-import com.picit.iam.model.Settings;
+import com.picit.iam.entity.Settings;
 import lombok.Builder;
 
 @Builder

@@ -1,10 +1,8 @@
 package com.picit.iam.services;
 
-import com.picit.iam.model.User;
+import com.picit.iam.entity.User;
 import com.picit.iam.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

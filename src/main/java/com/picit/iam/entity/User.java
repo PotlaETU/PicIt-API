@@ -1,4 +1,4 @@
-package com.picit.iam.model;
+package com.picit.iam.entity;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @Document(collection = "user")
 @Getter

@@ -1,4 +1,4 @@
-package com.picit.iam.model;
+package com.picit.iam.entity;
 
 import lombok.Builder;
 import lombok.Getter;
