@@ -27,8 +27,8 @@ public class IamController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@RequestBody TokenRefreshRequest tokenRefreshRequest) {
-        return iamService.refresh(tokenRefreshRequest);
+    public ResponseEntity<TokenResponse> refresh(@RequestBody TokenRefreshRequest tokenRefreshRequest, Authentication authentication) {
+        return iamService.refresh(tokenRefreshRequest, authentication.getName());
     }
 
     @GetMapping("/me")

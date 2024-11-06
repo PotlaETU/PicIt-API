@@ -91,4 +91,12 @@ public class JwtUtil {
                 .path("/")
                 .build();
     }
+
+    public ResponseCookie getCleanRefreshTokenCookie() {
+        return ResponseCookie.from("refreshToken", "")
+                .maxAge(0)
+                .httpOnly(true)
+                .path("/")
+                .build();
+    }
 }

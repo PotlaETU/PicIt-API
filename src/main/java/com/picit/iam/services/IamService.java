@@ -43,7 +43,7 @@ public class IamService {
         }
 
         var user = userMapper.toUser(signUpRequest);
-        user.setRefreshToken(jwtUtil.generateRefreshToken(user));
+        var refreshToken = jwtUtil.generateRefreshToken(user);
         user.setSettings(Settings.builder()
                 .build());
         user.getSettings().setNotifications(signUpRequest.notifications());
@@ -60,7 +60,7 @@ public class IamService {
                 .token(
                         TokenResponse.builder()
                                 .token(token)
-                                .refreshToken(user.getRefreshToken())
+                                .refreshToken(refreshToken)
                                 .build()
                 )
                 .expiration(Date.from(new Date()
@@ -83,14 +83,7 @@ public class IamService {
                 new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
         );
         String token = jwtUtil.generateToken(authUser);
-        String refreshToken;
-        if (jwtUtil.isTokenValid(authUser.getRefreshToken(), authUser)) {
-            refreshToken = authUser.getRefreshToken();
-        } else {
-            refreshToken = jwtUtil.generateRefreshToken(authUser);
-            authUser.setRefreshToken(refreshToken);
-            userRepository.save(authUser);
-        }
+        String refreshToken = jwtUtil.generateRefreshToken(authUser);;
 
         var loginResponse = LoginResponse.builder()
                 .token(
@@ -110,20 +103,19 @@ public class IamService {
         return ResponseEntity.ok(loginResponse);
     }
 
-    public ResponseEntity<TokenResponse> refresh(TokenRefreshRequest tokenRefreshRequest) {
+    public ResponseEntity<TokenResponse> refresh(TokenRefreshRequest tokenRefreshRequest, String username) {
         String refreshToken = tokenRefreshRequest.refreshToken();
-        String username = jwtUtil.extractUsername(refreshToken);
+        String usernameToken = jwtUtil.extractUsername(refreshToken);
 
-        User user = userRepository.findByUsername(username).orElseThrow(
+        User user = userRepository.findByUsername(usernameToken).orElseThrow(
                 () -> new UserNotFound("User not found")
         );
-        if (!refreshToken.equals(user.getRefreshToken()) || jwtUtil.isTokenExpired(refreshToken)) {
+        if (jwtUtil.isTokenExpired(refreshToken) || !username.equals(usernameToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         String newAccessToken = jwtUtil.generateToken(user);
         String newRefreshToken = jwtUtil.generateRefreshToken(user);
-        user.setRefreshToken(newRefreshToken);
         userRepository.save(user);
 
         var loginResponse = TokenResponse.builder()
@@ -146,19 +138,19 @@ public class IamService {
                 () -> new UserNotFound("User not found")
         );
 
-        authUser.setRefreshToken(null);
         userRepository.save(authUser);
 
         ResponseCookie cookie = jwtUtil.getCleanJwtCookie();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+        ResponseCookie refreshTokenCookie = jwtUtil.getCleanRefreshTokenCookie();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString(), refreshTokenCookie.toString())
                 .build();
 
     }
 
-    public ResponseEntity<UserDto> getUser(String userId) {
-        var user = userRepository.findByUsername(userId).orElseThrow(
+    public ResponseEntity<UserDto> getUser(String username) {
+        var user = userRepository.findByUsername(username).orElseThrow(
                 () -> new UserNotFound("User not found"));
-        var userProfile = userProfileRepository.findByUserId(userId);
+        var userProfile = userProfileRepository.findByUserId(user.getId());
         return ResponseEntity.ok(userMapper.toUserDto(user, userProfile));
     }
 }
