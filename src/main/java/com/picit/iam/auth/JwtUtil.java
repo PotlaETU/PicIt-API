@@ -44,6 +44,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .claim("username", user.getUsername())
                 .claim("email", user.getEmail())
+                .claim("role", user.getRole())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTime))
                 .signWith(getSignInKey())
@@ -54,6 +55,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .claim("username", user.getUsername())
                 .claim("email", user.getEmail())
+                .claim("role", user.getRole())
                 .subject(user.getId())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
@@ -76,6 +78,10 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         return extractAllClaims(token).get("username", String.class);
+    }
+
+    public String extractUserId(String token) {
+        return extractAllClaims(token).getSubject();
     }
 
     public ResponseCookie getCleanJwtCookie() {
