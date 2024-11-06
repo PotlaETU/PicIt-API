@@ -4,7 +4,9 @@ import com.picit.iam.auth.JwtUtil;
 import com.picit.iam.dto.*;
 import com.picit.iam.entity.Settings;
 import com.picit.iam.entity.User;
+import com.picit.iam.exceptions.UserNotFound;
 import com.picit.iam.mapper.UserMapper;
+import com.picit.iam.repository.UserProfileRepository;
 import com.picit.iam.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -33,6 +35,7 @@ public class IamService {
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder;
     private final Logger logger = LoggerFactory.getLogger(IamService.class);
+    private final UserProfileRepository userProfileRepository;
 
     public ResponseEntity<LoginResponse> signUp(SignUpRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.username()) || userRepository.existsByEmail(signUpRequest.email())) {
@@ -73,10 +76,9 @@ public class IamService {
     public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
         logger.info("Login request received for username: {}", loginRequest.username());
 
-        User authUser = userRepository.findByUsername(loginRequest.username());
-        if (authUser == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
+        User authUser = userRepository.findByUsername(loginRequest.username()).orElseThrow(
+                () -> new UserNotFound("User not found")
+        );
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
         );
@@ -112,8 +114,10 @@ public class IamService {
         String refreshToken = tokenRefreshRequest.refreshToken();
         String username = jwtUtil.extractUsername(refreshToken);
 
-        User user = userRepository.findByUsername(username);
-        if (user == null || !refreshToken.equals(user.getRefreshToken()) || jwtUtil.isTokenExpired(refreshToken)) {
+        User user = userRepository.findByUsername(username).orElseThrow(
+                () -> new UserNotFound("User not found")
+        );
+        if (!refreshToken.equals(user.getRefreshToken()) || jwtUtil.isTokenExpired(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
@@ -138,10 +142,9 @@ public class IamService {
         String token = authorizationHeader.substring(7);
         String username = jwtUtil.extractUsername(token);
 
-        User authUser = userRepository.findByUsername(username);
-        if (authUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        User authUser = userRepository.findByUsername(username).orElseThrow(
+                () -> new UserNotFound("User not found")
+        );
 
         authUser.setRefreshToken(null);
         userRepository.save(authUser);
@@ -150,5 +153,12 @@ public class IamService {
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();
 
+    }
+
+    public ResponseEntity<UserDto> getUser(String userId) {
+        var user = userRepository.findByUsername(userId).orElseThrow(
+                () -> new UserNotFound("User not found"));
+        var userProfile = userProfileRepository.findByUserId(userId);
+        return ResponseEntity.ok(userMapper.toUserDto(user, userProfile));
     }
 }
