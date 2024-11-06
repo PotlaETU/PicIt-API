@@ -6,9 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/iam")
@@ -33,8 +32,8 @@ public class IamController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> getMe() {
-        return ResponseEntity.ok("c'est bon tu es connecté");
+    public ResponseEntity<UserDto> getMe(Authentication authentication) {
+        return iamService.getUser(authentication.getName());
     }
 
     @PostMapping("/logout")
