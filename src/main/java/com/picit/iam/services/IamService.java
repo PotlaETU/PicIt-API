@@ -147,10 +147,10 @@ public class IamService {
 
     }
 
-    public ResponseEntity<UserDto> getUser(String username) {
+    public UserDto getUser(String username) {
         var user = userRepository.findByUsername(username).orElseThrow(
                 () -> new UserNotFound("User not found"));
         var userProfile = userProfileRepository.findByUserId(user.getId());
-        return ResponseEntity.ok(userMapper.toUserDto(user, userProfile));
+        return userMapper.toUserDto(user, userProfile);
     }
 }

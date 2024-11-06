@@ -32,7 +32,7 @@ public class IamController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getMe(Authentication authentication) {
+    public UserDto getMe(Authentication authentication) {
         return iamService.getUser(authentication.getName());
     }
 
