@@ -83,7 +83,7 @@ public class IamService {
                 new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
         );
         String token = jwtUtil.generateToken(authUser);
-        String refreshToken = jwtUtil.generateRefreshToken(authUser);;
+        String refreshToken = jwtUtil.generateRefreshToken(authUser);
 
         var loginResponse = LoginResponse.builder()
                 .token(
