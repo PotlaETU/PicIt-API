@@ -37,4 +37,13 @@ public class GlobalExceptionHandler {
                 .message(e.getMessage())
                 .build();
     }
+
+    @ExceptionHandler(UserNotFound.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorResponse handleUserNotFound(UserNotFound e) {
+        return ErrorResponse.builder()
+                .message(e.getMessage())
+                .build();
+    }
 }
