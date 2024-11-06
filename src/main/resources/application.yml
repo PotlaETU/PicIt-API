@@ -14,5 +14,5 @@ server:
 security:
   jwt:
     secret-key: ${JWT_SECRET_KEY:123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123}
-    expiration-time: 86400000 # 1 day in milliseconds
+    expiration-time: 3600000 # 1 hour in milliseconds
     refresh-time: 604800000 # 1 week in milliseconds
