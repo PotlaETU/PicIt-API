@@ -1,14 +1,20 @@
 package com.picit.iam.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Document(collection = "user")
 @Getter
@@ -26,25 +32,19 @@ public class User implements UserDetails {
 
     private String password;
 
-    private String profilePicture;
-
-    private String bio;
-
-    private String[] hobbies;
-
-    private String[] follows;
-
     private Settings settings;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
-    private String refreshToken;
+    private String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        Set<GrantedAuthority> roles = new HashSet<>();
+        roles.add(new SimpleGrantedAuthority("USER"));
+        return new ArrayList<>(roles);
     }
 
 }
