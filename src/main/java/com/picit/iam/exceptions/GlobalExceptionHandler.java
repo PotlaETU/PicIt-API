@@ -20,19 +20,19 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ExpiredJwtException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
-    public ErrorResponse handleRuntimeException(RuntimeException e) {
+    public ErrorResponse handleExpiredJwtException(ExpiredJwtException e) {
         return ErrorResponse.builder()
                 .message(e.getMessage())
                 .build();
     }
 
-    @ExceptionHandler(ExpiredJwtException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(UserNotFound.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public ErrorResponse handleExpiredJwtException(ExpiredJwtException e) {
+    public ErrorResponse handleUserNotFound(UserNotFound e) {
         return ErrorResponse.builder()
                 .message(e.getMessage())
                 .build();

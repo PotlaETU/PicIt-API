@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,7 +33,6 @@ public class WebSecurityConfig {
                         request -> {
                             request.requestMatchers(HttpMethod.POST, "/api/v1/iam/register").permitAll();
                             request.requestMatchers(HttpMethod.POST, "/api/v1/iam/login").permitAll();
-                            request.requestMatchers(HttpMethod.POST, "/api/v1/iam/refresh").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/actuator/health").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll();
@@ -41,6 +41,9 @@ public class WebSecurityConfig {
                 ).csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .sessionManagement(
+                        s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .addFilterBefore(
                         jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class
                 )
