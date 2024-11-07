@@ -24,6 +24,7 @@ public class JwtUtil {
     @Value("${security.jwt.expiration-time}")
     private long expirationTime;
 
+    @Getter
     @Value("${security.jwt.refresh-time}")
     private long refreshTime;
 

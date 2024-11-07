@@ -1,7 +1,5 @@
 package com.picit.iam.services;
 
-import com.picit.iam.dto.UserProfileDto;
-import com.picit.iam.exceptions.UserNotFound;
 import com.picit.iam.mapper.UserMapper;
 import com.picit.iam.repository.UserProfileRepository;
 import lombok.AllArgsConstructor;
@@ -23,13 +21,5 @@ public class UserProfileService {
         user.setProfilePicture(profilePicture);
         userProfileRepository.save(user);
         return ResponseEntity.ok().build();
-    }
-
-    public UserProfileDto getUserProfile(String userId) {
-        var userProfile = userProfileRepository.findByUserId(userId);
-        if (userProfile == null) {
-            throw new UserNotFound("User not found");
-        }
-        return userProfileMapper.toUserProfileDto(userProfile);
     }
 }

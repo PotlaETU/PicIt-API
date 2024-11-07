@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 @AllArgsConstructor
@@ -31,14 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String AUTH_HEADER = "Authorization";
         final String authHeader = request.getHeader(AUTH_HEADER);
 
-        String AUTH_PREFIX = "Bearer ";
-        if (authHeader == null || !authHeader.startsWith(AUTH_PREFIX)) {
+        String tokenCookies = getJwtFromCookie(request);
+        if (tokenCookies == null && (authHeader == null || !authHeader.startsWith("Bearer "))) {
             filterChain.doFilter(request, response);
             return;
         }
+        String token;
+        token = Objects.requireNonNullElseGet(tokenCookies, () -> authHeader.substring(7));
 
         try {
-            final String token = authHeader.substring(7);
             final String userId = jwtUtil.extractUserId(token);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -62,6 +64,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logger.error("Cannot set user authentication: {}", e);
             handlerExceptionResolver.resolveException(request, response, null, e);
         }
+    }
+
+    private String getJwtFromCookie(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 
 }
