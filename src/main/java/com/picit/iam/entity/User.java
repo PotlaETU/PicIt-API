@@ -16,11 +16,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-@Document(collection = "user")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
+@Document(collection = "user")
 public class User implements UserDetails {
 
     @Id
@@ -39,6 +39,8 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
 
     private String role;
+
+    private UserProfile userProfile;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
