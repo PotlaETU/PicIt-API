@@ -16,3 +16,6 @@ security:
     secret-key: ${JWT_SECRET_KEY:123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123}
     expiration-time: 3600000 # 1 hour in milliseconds
     refresh-time: 604800000 # 1 week in milliseconds
+
+neo4j-sync:
+  uri: http://localhost:5000/sync-neo4j
