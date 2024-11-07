@@ -16,7 +16,6 @@ public interface UserMapper {
     @Mapping(target = "role", expression = "java(\"USER\")")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "refreshToken", ignore = true)
     @Mapping(target = "settings", ignore = true)
     User toUser(SignUpRequest signUpRequest);
 
