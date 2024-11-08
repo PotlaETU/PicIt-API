@@ -34,7 +34,7 @@ public class MongoSyncService {
         this.restTemplate = builder.build();
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     public void syncMongoWithNeo4j() {
         List<User> usersToSync = userRepository.findAllByUpdatedAtAfter(lastSyncDate);
         List<Post> postsToSync = postRepository.findAllByUpdatedAtAfter(lastSyncDate);
