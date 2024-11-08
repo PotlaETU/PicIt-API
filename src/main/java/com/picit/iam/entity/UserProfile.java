@@ -1,12 +1,15 @@
 package com.picit.iam.entity;
 
 import com.picit.iam.entity.images.Image;
+import com.picit.post.entity.Hobby;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,9 +25,9 @@ public class UserProfile {
 
     private String bio;
 
-    private String[] hobbies;
+    private List<Hobby> hobbies;
 
-    private String[] follows;
+    private List<String> follows;
 
     private String userId;
 }
