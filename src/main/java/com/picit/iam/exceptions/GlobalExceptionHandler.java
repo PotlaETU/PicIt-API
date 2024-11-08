@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
-    @ExceptionHandler(UserNotFound.class)
+    @ExceptionHandler({UserNotFound.class, PostNotFound.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public ErrorResponse handleUserNotFound(UserNotFound e) {
