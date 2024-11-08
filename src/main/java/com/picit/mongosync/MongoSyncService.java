@@ -41,8 +41,8 @@ public class MongoSyncService {
 
         lastSyncDate = LocalDateTime.now();
 
-        restTemplate.postForObject(NEO4J_URL + "/sync-neo4j/users", usersToSync, Void.class);
-        restTemplate.postForObject(NEO4J_URL + "/sync-neo4j/posts", postsToSync, Void.class);
+        restTemplate.postForObject(NEO4J_URL + "/users", usersToSync, Void.class);
+        restTemplate.postForObject(NEO4J_URL + "/posts", postsToSync, Void.class);
     }
 
 }
