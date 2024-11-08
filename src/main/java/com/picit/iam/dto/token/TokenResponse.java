@@ -1,4 +1,4 @@
-package com.picit.iam.dto;
+package com.picit.iam.dto.token;
 
 import lombok.Builder;
 

@@ -4,10 +4,7 @@ import com.picit.iam.entity.User;
 import com.picit.iam.repository.UserRepository;
 import com.picit.post.entity.Post;
 import com.picit.post.repository.PostRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -37,15 +34,15 @@ public class MongoSyncService {
         this.restTemplate = builder.build();
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     public void syncMongoWithNeo4j() {
         List<User> usersToSync = userRepository.findAllByUpdatedAtAfter(lastSyncDate);
         List<Post> postsToSync = postRepository.findAllByUpdatedAtAfter(lastSyncDate);
 
         lastSyncDate = LocalDateTime.now();
 
-        restTemplate.postForObject(NEO4J_URL + "/sync-neo4j/users", usersToSync, Void.class);
-        restTemplate.postForObject(NEO4J_URL + "/sync-neo4j/posts", postsToSync, Void.class);
+        restTemplate.postForObject(NEO4J_URL + "/users", usersToSync, Void.class);
+        restTemplate.postForObject(NEO4J_URL + "/posts", postsToSync, Void.class);
     }
 
 }

@@ -1,6 +1,10 @@
 spring:
   profiles:
     active: env
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
   application:
     name: picit-api
@@ -19,3 +23,6 @@ security:
 
 neo4j-sync:
   uri: http://localhost:5000/sync-neo4j
+
+springdoc:
+  show-actuator: true

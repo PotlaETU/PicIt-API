@@ -6,6 +6,11 @@ API that hadles all the back-end for the PicIt social network
 
 - Copy the `src/main/resources/application-env.yml.example` to `src/main/resources/application-env.yml`
 
+
 - Update the `src/main/resources/application-env.yml` with the following variables:
 
 `JWT_SECRET_KEY`: The secret key for the JWT token (256 bits key that can be generated with the command `openssl rand -base64 32`, or use websites)
+
+## Swagger documentation
+
+- The API documentation is available at `http://localhost:8081/swagger-ui/index.html`
