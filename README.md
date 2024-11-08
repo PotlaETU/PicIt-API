@@ -13,4 +13,4 @@ API that hadles all the back-end for the PicIt social network
 
 ## Swagger documentation
 
-- The API documentation is available at `http://localhost:8081/swagger-ui/index.html`
+- The API documentation is available at [Swagger Doc](http://localhost:8081/swagger-ui/index.html)
