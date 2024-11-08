@@ -31,5 +31,7 @@ public class UserProfile {
     private List<String> follows;
 
     private String userId;
+
+    private String username;
 }
 
