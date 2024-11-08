@@ -1,5 +1,6 @@
 package com.picit.iam.controller;
 
+import com.picit.iam.controller.documentation.IamControllerDocumentation;
 import com.picit.iam.dto.login.LoginRequest;
 import com.picit.iam.dto.login.LoginResponse;
 import com.picit.iam.dto.login.SignUpRequest;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/iam")
 @AllArgsConstructor
-public class IamController {
+public class IamController implements IamControllerDocumentation {
 
     private final IamService iamService;
 

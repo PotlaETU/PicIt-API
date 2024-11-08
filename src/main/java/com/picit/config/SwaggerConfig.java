@@ -2,6 +2,7 @@ package com.picit.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -25,7 +26,12 @@ public class SwaggerConfig {
                 .info(new io.swagger.v3.oas.models.info.Info()
                         .title("Picit API")
                         .version("1.0")
-                        .description("API for Picit application"))
+                        .description("API for Picit application")
+                        .contact(new Contact()
+                                .email("timeoduchet@gmail.com")
+                                .name("Timeo Duchet"))
+                )
+
                 .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"))
                 .components(
                         new Components()

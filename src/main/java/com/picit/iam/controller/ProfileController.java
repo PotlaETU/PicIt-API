@@ -1,5 +1,6 @@
 package com.picit.iam.controller;
 
+import com.picit.iam.controller.documentation.ProfileControllerDocumentation;
 import com.picit.iam.dto.user.UserProfileDto;
 import com.picit.iam.services.UserProfileService;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/profile")
-public class ProfileController {
+public class ProfileController implements ProfileControllerDocumentation {
 
     private final UserProfileService profileService;
 
