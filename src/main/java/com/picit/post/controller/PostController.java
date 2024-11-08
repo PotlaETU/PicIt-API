@@ -1,5 +1,6 @@
 package com.picit.post.controller;
 
+import com.picit.post.controller.documentation.PostControllerDocumentation;
 import com.picit.post.dto.PostDto;
 import com.picit.post.dto.PostRequestDto;
 import com.picit.post.services.PostService;
@@ -14,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/post")
 @AllArgsConstructor
-public class PostController {
+public class PostController implements PostControllerDocumentation {
 
     private final PostService postService;
 

@@ -1,6 +1,7 @@
-package com.picit.iam.dto;
+package com.picit.iam.dto.login;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.picit.iam.dto.token.TokenResponse;
 import lombok.Builder;
 
 @Builder
