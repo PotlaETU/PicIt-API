@@ -1,6 +1,12 @@
 package com.picit.iam.controller;
 
-import com.picit.iam.dto.*;
+import com.picit.iam.controller.documentation.IamControllerDocumentation;
+import com.picit.iam.dto.login.LoginRequest;
+import com.picit.iam.dto.login.LoginResponse;
+import com.picit.iam.dto.login.SignUpRequest;
+import com.picit.iam.dto.token.TokenRefreshRequest;
+import com.picit.iam.dto.token.TokenResponse;
+import com.picit.iam.dto.user.UserDto;
 import com.picit.iam.services.IamService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -12,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/iam")
 @AllArgsConstructor
-public class IamController {
+public class IamController implements IamControllerDocumentation {
 
     private final IamService iamService;
 

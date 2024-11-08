@@ -1,13 +1,12 @@
 package com.picit.iam.mapper;
 
-import com.picit.iam.dto.SignUpRequest;
-import com.picit.iam.dto.UserDto;
-import com.picit.iam.dto.UserProfileDto;
+import com.picit.iam.dto.login.SignUpRequest;
+import com.picit.iam.dto.user.UserDto;
+import com.picit.iam.dto.user.UserProfileDto;
 import com.picit.iam.entity.User;
 import com.picit.iam.entity.UserProfile;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -17,6 +16,7 @@ public interface UserMapper {
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "settings", ignore = true)
+    @Mapping(target = "userProfile", ignore = true)
     User toUser(SignUpRequest signUpRequest);
 
     UserProfileDto toUserProfileDto(UserProfile userProfile);
