@@ -1,5 +1,6 @@
 package com.picit.message.controller;
 
+import com.picit.message.controller.documentation.MessageControllerDocumentation;
 import com.picit.message.services.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/api/v1/message")
 @AllArgsConstructor
-public class MessageController {
+public class MessageController implements MessageControllerDocumentation {
 
     private final MessageService messageService;
 
