@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -110,5 +111,65 @@ public class UserProfileService {
         return profile.stream()
                 .map(userProfileMapper::toUserProfileDto)
                 .toList();
+    }
+
+    public ResponseEntity<Void> blockUser(String name, String usernameUserToBlock) {
+        var userProfile = getUserProfile(name)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        var userToBlock = userRepository.findByUsername(usernameUserToBlock)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        userProfile.getBlockedUsers().add(userToBlock.getId());
+        userProfileRepository.save(userProfile);
+        return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity<Void> followUser(String name, String usernameUserToFollow) {
+        var userProfile = getUserProfile(name)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        var userToFollow = userRepository.findByUsername(usernameUserToFollow)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        userProfile.getFollows().add(userToFollow.getId());
+        var userToFollowProfile = userProfileRepository.findByUserId(userToFollow.getId());
+        userToFollowProfile.getFollowers().add(userProfile.getUserId());
+        userProfileRepository.save(userToFollowProfile);
+        userProfileRepository.save(userProfile);
+        return ResponseEntity.ok().build();
+    }
+
+    public List<UserProfileDto> getFollowing(String name) {
+        var userProfile = getUserProfile(name)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        List<UserProfile> userFollows = new ArrayList<>();
+        userProfile.getFollows()
+                .forEach(s -> userFollows.add(userProfileRepository.findByUserId(s)));
+
+        return userFollows.stream()
+                .map(userProfileMapper::toUserProfileDto)
+                .toList();
+    }
+
+    public List<UserProfileDto> getFollowers(String name) {
+        var userProfile = getUserProfile(name)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        List<UserProfile> userFollows = new ArrayList<>();
+        userProfile.getFollowers()
+                .forEach(s -> userFollows.add(userProfileRepository.findByUserId(s)));
+
+        return userFollows.stream()
+                .map(userProfileMapper::toUserProfileDto)
+                .toList();
+    }
+
+    public ResponseEntity<String> unfollowUser(String name, String username) {
+        var userProfile = getUserProfile(name)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        var userToUnfollow = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        userProfile.getFollows().remove(userToUnfollow.getId());
+        var userToUnfollowProfile = userProfileRepository.findByUserId(userToUnfollow.getId());
+        userToUnfollowProfile.getFollowers().remove(userProfile.getUserId());
+        userProfileRepository.save(userToUnfollowProfile);
+        userProfileRepository.save(userProfile);
+        return ResponseEntity.ok().build();
     }
 }
