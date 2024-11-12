@@ -24,4 +24,8 @@ public interface UserMapper {
     @Mapping(target = "id", source = "user.id")
     @Mapping(target = "username", source = "user.username")
     UserDto toUserDto(User user, UserProfile userProfile);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "userId", source = "user.id")
+    UserProfile toUserProfile(User user);
 }
