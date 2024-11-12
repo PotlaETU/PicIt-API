@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record PostDto(
-        UUID id,
+        String id,
         String userId,
         String content,
         String photoUrl,

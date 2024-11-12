@@ -14,6 +14,14 @@ public interface PostMapper {
     PostDto postToPostDto(Post post);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "likes", ignore = true)
+    @Mapping(target = "comments", ignore = true)
+    @Mapping(target = "userId", source = "id")
+    @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    Post postRequestDtoToPost(PostRequestDto postRequestDto, String id);
+
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "comments", ignore = true)
