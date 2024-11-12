@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class IamController implements IamControllerDocumentation {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@RequestBody TokenRefreshRequest tokenRefreshRequest, Authentication authentication, HttpServletRequest request) {
+    public ResponseEntity<TokenResponse> refresh(@RequestBody @Nullable TokenRefreshRequest tokenRefreshRequest, Authentication authentication, HttpServletRequest request) {
         return iamService.refresh(tokenRefreshRequest, authentication.getName(), request);
     }
 

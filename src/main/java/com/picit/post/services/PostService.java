@@ -58,10 +58,12 @@ public class PostService {
                 .toList();
     }
 
-    public List<PostDto> addPost(String username, PostDto postDto) {
-        var post = postMapper.postDtoToPost(postDto);
+    public PostDto createPost(String username, PostRequestDto postDto) {
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        var post = postMapper.postRequestDtoToPost(postDto, user.getId());
         postRepository.save(post);
-        return List.of(postMapper.postToPostDto(post));
+        return postMapper.postToPostDto(post);
     }
 
     public ResponseEntity<Void> deletePost(String username, String postId) {
