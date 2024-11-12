@@ -37,4 +37,30 @@ public class UserProfileController implements ProfileControllerDocumentation {
     public List<UserProfileDto> searchProfiles(@RequestParam("query") String query) {
         return profileService.searchProfiles(query);
     }
+
+    @PostMapping("/follow")
+    public ResponseEntity<Void> followUser(Authentication authentication, @RequestParam("username") String username) {
+        return profileService.followUser(authentication.getName(), username);
+    }
+
+    @PostMapping("/unfollow")
+    public ResponseEntity<String> unfollowUser(Authentication authentication, @RequestParam("username") String username) {
+        return profileService.unfollowUser(authentication.getName(), username);
+    }
+
+    @GetMapping("/followers")
+    public List<UserProfileDto> getFollowers(Authentication authentication) {
+        return profileService.getFollowers(authentication.getName());
+    }
+
+    @GetMapping("/following")
+    public List<UserProfileDto> getFollowing(Authentication authentication) {
+        return profileService.getFollowing(authentication.getName());
+    }
+
+    @PostMapping("/block")
+    public ResponseEntity<Void> blockUser(Authentication authentication, @RequestParam("username") String username) {
+        return profileService.blockUser(authentication.getName(), username);
+    }
 }
+
