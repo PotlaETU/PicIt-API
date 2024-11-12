@@ -39,7 +39,7 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @PostMapping("/follow")
-    public ResponseEntity<String> followUser(Authentication authentication, @RequestParam("username") String username) {
+    public ResponseEntity<Void> followUser(Authentication authentication, @RequestParam("username") String username) {
         return profileService.followUser(authentication.getName(), username);
     }
 
@@ -59,8 +59,8 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @PostMapping("/block")
-    public ResponseEntity<Void> getBlockedUsers(Authentication authentication) {
-        return profileService.blockUser(authentication.getName());
+    public ResponseEntity<Void> getBlockedUsers(Authentication authentication, @RequestParam("username") String username) {
+        return profileService.blockUser(authentication.getName(), username);
     }
 }
 
