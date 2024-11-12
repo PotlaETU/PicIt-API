@@ -30,6 +30,10 @@ public class UserProfile {
 
     private List<String> follows;
 
+    private List<String> followers;
+
+    private List<String> blockedUsers;
+
     private String userId;
 
     private String username;
