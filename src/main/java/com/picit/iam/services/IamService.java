@@ -24,7 +24,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -67,24 +66,10 @@ public class IamService {
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user);
-
         ResponseCookie jwtCookie = generateCookies(token, refreshToken).getFirst();
         ResponseCookie refreshTokenCookie = generateCookies(token, refreshToken).get(1);
+        var loginResponse = setCookiesAndLoginResponse(token, refreshToken, user);
 
-        var loginResponse = LoginResponse.builder()
-                .token(
-                        TokenResponse.builder()
-                                .token(token)
-                                .refreshToken(refreshToken)
-                                .build()
-                )
-                .expiration(Date.from(new Date()
-                                .toInstant()
-                                .plusMillis(jwtUtil.getExpirationTime()))
-                        .toString())
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .build();
         logger.info("SignUp response generated for username: {}", signUpRequest.username());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString(), refreshTokenCookie.toString())
@@ -105,21 +90,8 @@ public class IamService {
 
         ResponseCookie jwtCookie = generateCookies(token, refreshToken).getFirst();
         ResponseCookie refreshTokenCookie = generateCookies(token, refreshToken).get(1);
+        var loginResponse = setCookiesAndLoginResponse(token, refreshToken, authUser);
 
-        var loginResponse = LoginResponse.builder()
-                .token(
-                        TokenResponse.builder()
-                                .token(token)
-                                .refreshToken(refreshToken)
-                                .build()
-                )
-                .expiration(Date.from(new Date()
-                                .toInstant()
-                                .plusMillis(jwtUtil.getExpirationTime()))
-                        .toString())
-                .email(authUser.getEmail())
-                .username(authUser.getUsername())
-                .build();
         logger.info("Login response generated for username: {}", loginRequest.username());
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString(), refreshTokenCookie.toString())
@@ -210,6 +182,23 @@ public class IamService {
             }
         }
         return null;
+    }
+
+    private LoginResponse setCookiesAndLoginResponse(String token, String refreshToken, User user) {
+        return LoginResponse.builder()
+                .token(
+                        TokenResponse.builder()
+                                .token(token)
+                                .refreshToken(refreshToken)
+                                .build()
+                )
+                .expiration(Date.from(new Date()
+                                .toInstant()
+                                .plusMillis(jwtUtil.getExpirationTime()))
+                        .toString())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .build();
     }
 
 
