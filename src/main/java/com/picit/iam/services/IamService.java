@@ -64,6 +64,7 @@ public class IamService {
 
         var userProfile = userProfileRepository.save(userMapper.toUserProfile(userSaved));
         user.setUserProfile(userProfile);
+        userRepository.save(user);
 
         String token = jwtUtil.generateToken(user);
 
