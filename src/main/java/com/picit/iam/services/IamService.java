@@ -126,12 +126,9 @@ public class IamService {
     }
 
     public ResponseEntity<TokenResponse> refresh(TokenRefreshRequest tokenRefreshRequest, String username, HttpServletRequest http) {
-        String refreshToken = tokenRefreshRequest.refreshToken();
+        String refreshToken = tokenRefreshRequest != null ? tokenRefreshRequest.refreshToken() : null;
         if (refreshToken == null) {
             refreshToken = getTokenFromCookie("refreshToken", http);
-        }
-        if (refreshToken == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
         String usernameToken = jwtUtil.extractUsername(refreshToken);
 
