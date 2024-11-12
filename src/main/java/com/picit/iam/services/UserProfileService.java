@@ -41,7 +41,7 @@ public class UserProfileService {
             }
 
             ProfilePicImage profilePicture = ProfilePicImage.builder()
-                    .userId(file.getOriginalFilename())
+                    .userId(userProfile.getUserId())
                     .image(new Binary(file.getBytes()))
                     .aiGenerated(false)
                     .build();
@@ -78,10 +78,11 @@ public class UserProfileService {
     public ResponseEntity<byte[]> getProfilePicture(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound("User not found"));
+        var userProfile = userProfileRepository.findByUserId(user.getId());
 
-        Image profilePic = user.getUserProfile().getProfilePicture();
+        Image profilePic = userProfile.getProfilePicture();
         if (profilePic != null) {
-            byte[] profilePicData = user.getUserProfile()
+            byte[] profilePicData = userProfile
                     .getProfilePicture()
                     .getImage()
                     .getData();
