@@ -29,9 +29,9 @@ public class PostController implements PostControllerDocumentation {
         return postService.getPosts(authentication.getName(), hobby);
     }
 
-    @PostMapping("/add")
-    public List<PostDto> addPost(Authentication authentication, @Valid @RequestBody PostDto postDto) {
-        return postService.addPost(authentication.getName(), postDto);
+    @PostMapping
+    public PostDto createPost(Authentication authentication, @Valid @RequestBody PostRequestDto postDto) {
+        return postService.createPost(authentication.getName(), postDto);
     }
 
     @DeleteMapping("/{id}")
