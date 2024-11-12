@@ -9,10 +9,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/profile")
-public class ProfileController implements ProfileControllerDocumentation {
+public class UserProfileController implements ProfileControllerDocumentation {
 
     private final UserProfileService profileService;
 
@@ -29,5 +31,10 @@ public class ProfileController implements ProfileControllerDocumentation {
     @PostMapping
     public ResponseEntity<String> createProfile(Authentication authentication, @RequestBody UserProfileDto bio) {
         return profileService.createProfile(authentication.getName(), bio);
+    }
+
+    @GetMapping("/search")
+    public List<UserProfileDto> searchProfiles(@RequestParam("query") String query) {
+        return profileService.searchProfiles(query);
     }
 }
