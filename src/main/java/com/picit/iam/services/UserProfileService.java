@@ -103,4 +103,12 @@ public class UserProfileService {
         return Optional.of(userProfile);
     }
 
+    public List<UserProfileDto> searchProfiles(String query) {
+        var profile = userProfileRepository.findByUsernameRegex(".*" + query + ".*")
+                .orElseThrow(() -> new UserNotFound("User not found"));
+
+        return profile.stream()
+                .map(userProfileMapper::toUserProfileDto)
+                .toList();
+    }
 }

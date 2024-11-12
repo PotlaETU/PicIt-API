@@ -9,6 +9,7 @@ import com.picit.iam.dto.token.TokenResponse;
 import com.picit.iam.dto.user.UserDto;
 import com.picit.iam.entity.Settings;
 import com.picit.iam.entity.User;
+import com.picit.iam.exceptions.ConflictException;
 import com.picit.iam.exceptions.UserNotFound;
 import com.picit.iam.mapper.UserMapper;
 import com.picit.iam.repository.UserProfileRepository;
@@ -45,7 +46,7 @@ public class IamService {
 
     public ResponseEntity<LoginResponse> signUp(SignUpRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.username()) || userRepository.existsByEmail(signUpRequest.email())) {
-            throw new UsernameNotFoundException("Username or email already exists");
+            throw new ConflictException("Username or email already exists");
         }
 
         var user = userMapper.toUser(signUpRequest);
@@ -59,7 +60,11 @@ public class IamService {
             user.getSettings().setPrivacy("private");
         }
         user.setPassword(passwordEncoder.encode(signUpRequest.password()));
-        userRepository.save(user);
+        var userSaved = userRepository.save(user);
+
+        var userProfile = userProfileRepository.save(userMapper.toUserProfile(userSaved));
+        user.setUserProfile(userProfile);
+
         String token = jwtUtil.generateToken(user);
 
         ResponseCookie jwtCookie = generateCookies(token, refreshToken).getFirst();

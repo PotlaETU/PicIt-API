@@ -37,4 +37,13 @@ public class GlobalExceptionHandler {
                 .message(e.getMessage())
                 .build();
     }
+
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public ErrorResponse handleConflictException(ConflictException e) {
+        return ErrorResponse.builder()
+                .message(e.getMessage())
+                .build();
+    }
 }

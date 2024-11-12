@@ -7,6 +7,7 @@ import java.util.List;
 
 @Builder
 public record UserProfileDto(
+        String username,
         String bio,
         List<Hobby> hobbies,
         List<String> follows
