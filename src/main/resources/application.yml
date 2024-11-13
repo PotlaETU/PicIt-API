@@ -24,5 +24,9 @@ security:
 neo4j-sync:
   uri: http://localhost:5000/sync-neo4j
 
+generate-ai-images:
+  uri: http://localhost:5000/api/v1/
+  uri-get-images: http://localhost:5000/api/v1/images/
+
 springdoc:
   show-actuator: true
