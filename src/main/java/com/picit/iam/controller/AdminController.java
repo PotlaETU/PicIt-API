@@ -18,7 +18,7 @@ public class AdminController {
     private final ExportAndImportService exportAndImportService;
 
     @GetMapping("/backup")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<Void> backupDataCsv(@RequestParam("collection") String collectionName) {
         return exportAndImportService.backupDataCsv(collectionName);
     }
