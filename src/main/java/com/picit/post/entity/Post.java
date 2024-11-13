@@ -20,7 +20,7 @@ public class Post {
     private String content;
     private String photoUrl;
     private Hobby hobby;
-    private List<UUID> likes;
+    private List<Likes> likes;
     private Boolean isPublic;
     private String userId;
     private List<Comment> comments;

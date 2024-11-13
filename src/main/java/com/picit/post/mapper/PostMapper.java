@@ -9,8 +9,6 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface PostMapper {
-    Post postDtoToPost(PostDto postDto);
-
     PostDto postToPostDto(Post post);
 
     @Mapping(target = "id", ignore = true)

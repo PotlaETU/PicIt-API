@@ -7,8 +7,8 @@ import java.util.UUID;
 
 @Builder
 public record CommentDto(
-        UUID id,
-        String username,
+        String id,
+        String userId,
         String content,
         LocalDateTime createdAt
 ) {
