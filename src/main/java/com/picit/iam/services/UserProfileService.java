@@ -1,5 +1,6 @@
 package com.picit.iam.services;
 
+import com.picit.iam.dto.responseType.AIImagesResponse;
 import com.picit.iam.dto.user.UserProfileDto;
 import com.picit.iam.entity.User;
 import com.picit.iam.entity.UserProfile;
@@ -11,11 +12,14 @@ import com.picit.iam.repository.ProfilePicRepository;
 import com.picit.iam.repository.UserProfileRepository;
 import com.picit.iam.repository.UserRepository;
 import com.picit.post.entity.Hobby;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.Binary;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -23,18 +27,45 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
     private final UserMapper userProfileMapper;
     private final UserRepository userRepository;
     private final ProfilePicRepository profilePicRepository;
+    private final RestTemplate restTemplate = new RestTemplateBuilder().build();
 
+    @Value("${generate-ai-images.uri}")
+    private String URL_AI;
 
-    public ResponseEntity<String> updateProfilePicture(String username, MultipartFile file) {
+    @Value("${generate-ai-images.uri-get-images}")
+    private String URL_AI_GET_IMAGES;
+
+    public ResponseEntity<String> updateProfilePicture(String username, MultipartFile file, boolean aiGenerated) {
         var userProfile = getUserProfile(username)
                 .orElseThrow(() -> new UserNotFound("User not found"));
+        if (file == null && !aiGenerated) {
+            return ResponseEntity.badRequest().body("Please select a file to upload or set aiGenerated to true.");
+        }
+        if (aiGenerated) {
+            URL_AI = URL_AI + "generate_profile_pic";
+            AIImagesResponse res = restTemplate.postForEntity(URL_AI, null, AIImagesResponse.class).getBody();
+            if (res == null) {
+                return ResponseEntity.internalServerError().body("Error generating image");
+            }
+            var image = restTemplate.getForEntity(URL_AI_GET_IMAGES + "image_1.png", byte[].class).getBody();
+            if (image == null) {
+                return ResponseEntity.internalServerError().body("Error getting image");
+            }
+            var imageGenerated = ProfilePicImage.builder()
+                    .userId(userProfile.getUserId())
+                    .aiGenerated(true)
+                    .image(new Binary(image))
+                    .build();
+            profilePicRepository.save(imageGenerated);
+            return ResponseEntity.ok().build();
+        }
         try {
             if (file.isEmpty()) {
                 return ResponseEntity.badRequest().body("Please select a file to upload.");
