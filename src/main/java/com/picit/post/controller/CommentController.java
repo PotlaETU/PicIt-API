@@ -28,7 +28,7 @@ public class CommentController implements CommentControllerDocumentation {
     }
 
     @PutMapping
-    public ResponseEntity<Void> updateComment(Authentication authentication, @Valid @RequestBody CommentRequestDto commentRequestDto) {
+    public ResponseEntity<CommentDto> updateComment(Authentication authentication, @Valid @RequestBody CommentRequestDto commentRequestDto) {
         return commentService.updateComment(authentication.getName(), commentRequestDto);
     }
 }
