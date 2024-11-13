@@ -12,7 +12,7 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "role", expression = "java(\"USER\")")
+    @Mapping(target = "role", expression = "java(\"ROLE_USER\")")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "settings", ignore = true)
@@ -23,6 +23,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", source = "user.id")
     @Mapping(target = "username", source = "user.username")
+    @Mapping(target = "profilePicture", ignore = true)
     UserDto toUserDto(User user, UserProfile userProfile);
 
     @Mapping(target = "id", ignore = true)
