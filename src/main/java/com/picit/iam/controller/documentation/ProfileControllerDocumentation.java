@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Profile", description = "Profile management")
@@ -19,7 +18,7 @@ public interface ProfileControllerDocumentation {
             @ApiResponse(responseCode = "200", description = "Profile picture updated successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
-    ResponseEntity<String> addOrUpdateProfilePicture(Authentication authentication, @RequestParam("file") MultipartFile file);
+    ResponseEntity<String> addOrUpdateProfilePicture(Authentication authentication, MultipartFile file, boolean aiGenerated);
 
     @Operation(summary = "Get profile picture", description = "Retrieves the profile picture of the authenticated user")
     @ApiResponses(value = {
