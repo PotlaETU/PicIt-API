@@ -13,5 +13,5 @@ public interface CommentControllerDocumentation {
 
     ResponseEntity<Void> deleteComment(Authentication authentication, String commentId);
 
-    ResponseEntity<Void> updateComment(Authentication authentication, CommentRequestDto commentRequestDto);
+    ResponseEntity<CommentDto> updateComment(Authentication authentication, CommentRequestDto commentRequestDto);
 }
