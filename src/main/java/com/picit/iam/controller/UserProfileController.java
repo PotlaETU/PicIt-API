@@ -19,8 +19,10 @@ public class UserProfileController implements ProfileControllerDocumentation {
     private final UserProfileService profileService;
 
     @PostMapping("/picture")
-    public ResponseEntity<String> addOrUpdateProfilePicture(Authentication authentication, @RequestParam("file") MultipartFile file) {
-        return profileService.updateProfilePicture(authentication.getName(), file);
+    public ResponseEntity<String> addOrUpdateProfilePicture(Authentication authentication,
+                                                            @RequestParam(value = "file", required = false) MultipartFile file,
+                                                            @RequestParam(value = "aiGenerated", required = false, defaultValue = "false") boolean aiGenerated) {
+        return profileService.updateProfilePicture(authentication.getName(), file, aiGenerated);
     }
 
     @GetMapping("/picture")
