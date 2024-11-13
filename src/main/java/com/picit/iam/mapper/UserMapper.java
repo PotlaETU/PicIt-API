@@ -27,5 +27,11 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "profilePicture", ignore = true)
+    @Mapping(target = "bio", ignore = true)
+    @Mapping(target = "hobbies", ignore = true)
+    @Mapping(target = "follows", ignore = true)
+    @Mapping(target = "followers", ignore = true)
+    @Mapping(target = "blockedUsers", ignore = true)
     UserProfile toUserProfile(User user);
 }

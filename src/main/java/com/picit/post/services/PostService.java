@@ -10,6 +10,7 @@ import com.picit.post.dto.PostDto;
 import com.picit.post.dto.PostRequestDto;
 import com.picit.post.entity.Post;
 import com.picit.post.mapper.PostMapper;
+import com.picit.post.repository.LikesRepository;
 import com.picit.post.repository.PostRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -49,7 +50,7 @@ public class PostService {
                 .orElseThrow(() -> new UserNotFound("User not found"));
 
         var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
-        if (hobby != null){
+        if (hobby != null) {
             query.addCriteria(PostCriteria.postsByHobby(hobby));
         }
         return mongoTemplate.find(query, Post.class)
@@ -67,22 +68,30 @@ public class PostService {
     }
 
     public ResponseEntity<Void> deletePost(String username, String postId) {
-        // Identifier le post
-        var post = postRepository.findById(postId).orElseThrow(
-                () -> new PostNotFound("Post not found")
-        );
-        // Supprimer le post de la collection de posts
-        postRepository.delete(post);
+        var post = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFound("Post not found"));
+        var userId = userRepository.findByUsername(username)
+                .map(User::getId)
+                .orElseThrow(() -> new UserNotFound("User not found"));
 
+        if (!post.getUserId().equals(userId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        postRepository.delete(post);
         return ResponseEntity.ok().build();
     }
 
     public PostDto updatePost(String username, String postId, PostRequestDto postDto) {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFound("Post not found"));
+        var userId = userRepository.findByUsername(username)
+                .map(User::getId)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        if (!post.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("User is not the owner of the post");
+        }
         Post updatedPost = postMapper.updatePostFromPostRequestDto(postDto, post);
         postRepository.save(updatedPost);
         return postMapper.postToPostDto(updatedPost);
     }
-
 }
