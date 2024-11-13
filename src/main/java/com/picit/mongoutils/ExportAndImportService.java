@@ -5,6 +5,7 @@ import com.picit.iam.repository.UserRepository;
 import com.picit.post.entity.Post;
 import com.picit.post.repository.PostRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Paths;
 import java.util.List;
 
+@Log4j2
 @Service
 @AllArgsConstructor
 public class ExportAndImportService {
@@ -35,6 +37,7 @@ public class ExportAndImportService {
     }
 
     private ResponseEntity<Void> writeUsersToCsv() {
+        log.info("Backup requested for users");
         List<User> users = userRepository.findAll();
         String filePath = Paths.get(STATIC_DIR, "users.csv").toString();
         try (FileOutputStream fos = new FileOutputStream(filePath);
@@ -51,6 +54,7 @@ public class ExportAndImportService {
     }
 
     private ResponseEntity<Void> writePostsToCsv() {
+        log.info("Backup requested for posts");
         List<Post> posts = postRepository.findAll();
         String filePath = Paths.get(STATIC_DIR, "users.csv").toString();
         try (FileOutputStream fos = new FileOutputStream(filePath);
