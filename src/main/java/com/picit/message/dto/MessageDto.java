@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 @Builder
 public record MessageDto (
         String id,
-        String sender_id,
-        String room_id,
+        String senderId,
+        String roomId,
         String content,
         LocalDateTime createdAt
 ) {

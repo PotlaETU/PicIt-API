@@ -37,7 +37,7 @@ public class CommentService {
         var comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new UserNotFound("Comment not found"));
 
-        if (!userId.equals(comment.getUserId())){
+        if (!userId.equals(comment.getUserId())) {
             return ResponseEntity.status(403).build();
         } else {
             commentRepository.deleteById(commentId);
@@ -45,7 +45,23 @@ public class CommentService {
         }
     }
 
-    public ResponseEntity<Void> updateComment(String name, CommentRequestDto commentRequestDto) {
-        return null;
+    public ResponseEntity<CommentDto> updateComment(String name, CommentRequestDto commentRequestDto) {
+        var userId = userRepository.findByUsername(name)
+                .map(User::getId)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+
+        var comment = commentRepository.findById(commentRequestDto.commentId())
+                .orElseThrow(() -> new UserNotFound("Comment not found"));
+        if (comment.getContent().isBlank()) {
+            return ResponseEntity.status(400).build();
+        }
+        if (comment.getUserId().equals(userId)) {
+            comment.setContent(commentRequestDto.content());
+            var savedComment = commentRepository.save(comment);
+            var commentDto = commentMapper.commentToCommentDto(savedComment);
+            return ResponseEntity.ok().body(commentDto);
+        } else {
+            return ResponseEntity.status(403).build();
+        }
     }
 }

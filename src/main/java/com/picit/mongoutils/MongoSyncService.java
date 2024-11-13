@@ -1,4 +1,4 @@
-package com.picit.mongosync;
+package com.picit.mongoutils;
 
 import com.picit.iam.entity.User;
 import com.picit.iam.repository.UserRepository;

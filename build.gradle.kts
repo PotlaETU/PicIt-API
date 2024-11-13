@@ -37,6 +37,7 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
     implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
     implementation("org.springframework.boot:spring-boot-starter-websocket")
+    implementation("org.apache.commons:commons-csv:1.12.0")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     compileOnly("org.projectlombok:lombok:1.18.34")
