@@ -4,19 +4,16 @@ import com.picit.iam.entity.User;
 import com.picit.iam.repository.UserRepository;
 import com.picit.post.entity.Post;
 import com.picit.post.repository.PostRepository;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -25,56 +22,49 @@ public class ExportAndImportService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
-    public ResponseEntity<InputStreamResource> backupDataCsv(String filePath, String collectionName) {
+    private static final String STATIC_DIR = "src/main/resources/static";
+
+    public ResponseEntity<Void> backupDataCsv(String collectionName) {
         if ("users".equals(collectionName)) {
-            return writeUsersToCsv(filePath);
+            return writeUsersToCsv();
         } else if ("posts".equals(collectionName)) {
-            writePostsToCsv(filePath);
-            return writePostsToCsv(filePath);
+            return writePostsToCsv();
         } else {
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    private ResponseEntity<InputStreamResource> writeUsersToCsv(String filePath) {
+    private ResponseEntity<Void> writeUsersToCsv() {
         List<User> users = userRepository.findAll();
-        try (FileWriter out = new FileWriter(filePath);
-             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT)) {
+        String filePath = Paths.get(STATIC_DIR, "users.csv").toString();
+        try (FileOutputStream fos = new FileOutputStream(filePath);
+             CSVPrinter printer = new CSVPrinter(new OutputStreamWriter(fos), CSVFormat.DEFAULT)) {
             for (User user : users) {
                 printer.printRecord(user.getId(), user.getUsername(),
                         user.getEmail(), user.getPassword(), user.getRole());
             }
-            return getInputStreamResourceResponseEntity(out, printer);
+            printer.flush();
+            return ResponseEntity.ok().build();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write users to csv file");
+            throw new RuntimeException("Failed to write users to csv file", e);
         }
     }
 
-    private ResponseEntity<InputStreamResource> writePostsToCsv(String filePath) {
+    private ResponseEntity<Void> writePostsToCsv() {
         List<Post> posts = postRepository.findAll();
-        try (FileWriter out = new FileWriter(filePath);
-             CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT)) {
+        String filePath = Paths.get(STATIC_DIR, "users.csv").toString();
+        try (FileOutputStream fos = new FileOutputStream(filePath);
+             CSVPrinter printer = new CSVPrinter(new OutputStreamWriter(fos), CSVFormat.DEFAULT)) {
             for (Post post : posts) {
                 printer.printRecord(post.getId(), post.getContent(),
                         post.getComments(), post.getHobby(), post.getIsPublic(), post.getUserId(),
                         post.getLikes(), post.getCreatedAt(), post.getUpdatedAt());
             }
-            return getInputStreamResourceResponseEntity(out, printer);
+            printer.flush();
+            return ResponseEntity.ok().build();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write posts to csv file");
+            throw new RuntimeException("Failed to write posts to csv file", e);
         }
-    }
 
-    @NotNull
-    private ResponseEntity<InputStreamResource> getInputStreamResourceResponseEntity(FileWriter out, CSVPrinter printer) throws IOException {
-        printer.flush();
-        ByteArrayInputStream in = new ByteArrayInputStream(out.toString().getBytes());
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=backup.csv");
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentType(MediaType.parseMediaType("text/csv"))
-                .body(new InputStreamResource(in));
     }
 }

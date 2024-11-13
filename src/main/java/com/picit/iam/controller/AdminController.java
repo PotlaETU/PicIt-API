@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/admin")
+@RequestMapping("/api/v1/admin")
 public class AdminController {
 
     private final ExportAndImportService exportAndImportService;
 
     @GetMapping("/backup")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<InputStreamResource> backupDataCsv(String filePath, @RequestParam("collection") String collectionName) {
-        return exportAndImportService.backupDataCsv(filePath, collectionName);
+    public ResponseEntity<Void> backupDataCsv(@RequestParam("collection") String collectionName) {
+        return exportAndImportService.backupDataCsv(collectionName);
     }
 }
