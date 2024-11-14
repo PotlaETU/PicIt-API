@@ -17,15 +17,11 @@ public class MessageController implements MessageControllerDocumentation {
 
     private final MessageService messageService;
 
-    @MessageMapping("/sendMessage")
-    @SendTo("/topic/public")
-    public MessageDto sendMessage(@Payload MessageDto chatMessage) {
-        return chatMessage;
-    }
-
-    @MessageMapping("/sendMessage/{convId}")
-    @SendTo("/topic/{convId}")
-    public MessageService sendMessageToConvId(@Payload MessageService chatMessage, SimpMessageHeaderAccessor headerAccessor, @DestinationVariable("convId") String conversationId) {
+    @MessageMapping("chat.sendMessage")
+    @SendTo("/topic/chat/{roomId}")
+    public MessageDto sendMessageToConvId(@Payload MessageDto chatMessage,
+                                          SimpMessageHeaderAccessor headerAccessor,
+                                          @DestinationVariable("roomId") String conversationId) {
         messageService.sendMessageToConvId(chatMessage, conversationId, headerAccessor);
         return chatMessage;
     }

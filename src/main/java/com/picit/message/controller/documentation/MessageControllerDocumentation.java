@@ -1,5 +1,6 @@
 package com.picit.message.controller.documentation;
 
+import com.picit.message.dto.MessageDto;
 import com.picit.message.services.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,5 +18,5 @@ public interface MessageControllerDocumentation {
             @ApiResponse(responseCode = "200", description = "Message sent successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
-    MessageService sendMessageToConvId(@Payload MessageService chatMessage, SimpMessageHeaderAccessor headerAccessor, @DestinationVariable("convId") String conversationId);
+    MessageDto sendMessageToConvId(@Payload MessageDto chatMessage, SimpMessageHeaderAccessor headerAccessor, @DestinationVariable("convId") String conversationId);
 }
