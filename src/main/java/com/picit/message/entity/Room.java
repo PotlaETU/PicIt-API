@@ -1,23 +1,22 @@
 package com.picit.message.entity;
 
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
-@Document(collection = "messages")
-public class Message {
+@Document(collection = "room")
+public class Room {
     @Id
     private String id;
-    private String senderId;
-    private String roomId;
-    private String content;
-    private LocalDateTime timestamp;
+
+    private List<String> users;
+
+    private List<Message> messages;
 }
