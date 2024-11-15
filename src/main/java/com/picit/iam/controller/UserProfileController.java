@@ -1,6 +1,7 @@
 package com.picit.iam.controller;
 
 import com.picit.iam.controller.documentation.ProfileControllerDocumentation;
+import com.picit.iam.dto.user.SuggestedUserDto;
 import com.picit.iam.dto.user.UserProfileDto;
 import com.picit.iam.services.UserProfileService;
 import lombok.AllArgsConstructor;
@@ -66,7 +67,7 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @GetMapping("/suggestions")
-    public ResponseEntity<String> getSuggestions(Authentication authentication) {
+    public List<SuggestedUserDto> getSuggestions(Authentication authentication) {
         return profileService.getSuggestions(authentication.getName());
     }
 }

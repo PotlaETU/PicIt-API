@@ -55,4 +55,13 @@ public class GlobalExceptionHandler {
                 .message(e.getMessage())
                 .build();
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ErrorResponse handleRuntimeException(RuntimeException e) {
+        return ErrorResponse.builder()
+                .message(e.getMessage())
+                .build();
+    }
 }
