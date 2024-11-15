@@ -28,5 +28,8 @@ generate-ai-images:
   uri: http://localhost:5000/api/v1/
   uri-get-images: http://localhost:5000/api/v1/images/
 
+suggestion:
+  uri: http://localhost:5000/suggest-friends/
+
 springdoc:
   show-actuator: true

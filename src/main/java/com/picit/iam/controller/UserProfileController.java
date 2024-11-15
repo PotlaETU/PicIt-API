@@ -64,5 +64,10 @@ public class UserProfileController implements ProfileControllerDocumentation {
     public ResponseEntity<Void> blockUser(Authentication authentication, @RequestParam("username") String username) {
         return profileService.blockUser(authentication.getName(), username);
     }
+
+    @GetMapping("/suggestions")
+    public ResponseEntity<String> getSuggestions(Authentication authentication) {
+        return profileService.getSuggestions(authentication.getName());
+    }
 }
 
