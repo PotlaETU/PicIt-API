@@ -5,6 +5,8 @@ public enum Hobby {
     FILM_SERIE,
     CUISINE,
     DETENTE,
-    JEUX_VIDEO,
     GAMING,
+    LECTURE,
+    MUSIQUE,
+    VOYAGE
 }
