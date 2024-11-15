@@ -29,7 +29,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
-
     private final UserProfileRepository userProfileRepository;
     private final UserMapper userProfileMapper;
     private final UserRepository userRepository;
@@ -41,6 +40,9 @@ public class UserProfileService {
 
     @Value("${generate-ai-images.uri-get-images}")
     private String URL_AI_GET_IMAGES;
+
+    @Value("${suggestion.uri}")
+    private String URL_SUGGESTIONS;
 
     public ResponseEntity<String> updateProfilePicture(String username, MultipartFile file, boolean aiGenerated) {
         var userProfile = getUserProfile(username)
@@ -203,5 +205,16 @@ public class UserProfileService {
         userProfileRepository.save(userToUnfollowProfile);
         userProfileRepository.save(userProfile);
         return ResponseEntity.ok().build();
+    }
+
+    public ResponseEntity<String> getSuggestions(String name) {
+        var userId = userRepository.findByUsername(name)
+                .map(User::getId)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        String suggestedUsers = restTemplate.getForEntity(URL_SUGGESTIONS + userId, String.class).getBody();
+        if (suggestedUsers == null || suggestedUsers.contains("error")) {
+            return ResponseEntity.internalServerError().body("Error getting suggestions");
+        }
+        return ResponseEntity.ok(suggestedUsers);
     }
 }
