@@ -1,6 +1,8 @@
 package com.picit.iam.services;
 
 import com.picit.iam.dto.responseType.AIImagesResponse;
+import com.picit.iam.dto.responseType.SuggestionsResponses;
+import com.picit.iam.dto.user.SuggestedUserDto;
 import com.picit.iam.dto.user.UserProfileDto;
 import com.picit.iam.entity.User;
 import com.picit.iam.entity.UserProfile;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -207,14 +210,28 @@ public class UserProfileService {
         return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<String> getSuggestions(String name) {
+    public List<SuggestedUserDto> getSuggestions(String name) {
         var userId = userRepository.findByUsername(name)
                 .map(User::getId)
                 .orElseThrow(() -> new UserNotFound("User not found"));
-        String suggestedUsers = restTemplate.getForEntity(URL_SUGGESTIONS + userId, String.class).getBody();
-        if (suggestedUsers == null || suggestedUsers.contains("error")) {
-            return ResponseEntity.internalServerError().body("Error getting suggestions");
+        ResponseEntity<SuggestionsResponses[]> response = restTemplate.getForEntity(URL_SUGGESTIONS + "87dc60b7-8075-4b06-acc8-8b70d6d1e5e4", SuggestionsResponses[].class);
+        SuggestionsResponses[] jsonResponse = response.getBody();
+        if (jsonResponse == null) {
+            throw new RuntimeException("Error getting suggestions");
         }
-        return ResponseEntity.ok(suggestedUsers);
+        if (jsonResponse[0].error() != null) {
+            throw new UserNotFound("User not found");
+        }
+        List<SuggestedUserDto> suggestedUsers = new ArrayList<>();
+        for (SuggestionsResponses suggestionsResponses : jsonResponse) {
+            var userProfile = userProfileRepository.findByUsernameRegex(suggestionsResponses.username())
+                    .orElseThrow(() -> new UserNotFound("User not found"));
+            SuggestedUserDto suggestedUser = SuggestedUserDto.builder()
+                    .userProfile(userProfileMapper.toUserProfileDto(userProfile.getFirst()))
+                    .commonHobbies(suggestionsResponses.commonHobbies())
+                    .build();
+            suggestedUsers.add(suggestedUser);
+        }
+        return suggestedUsers;
     }
 }
