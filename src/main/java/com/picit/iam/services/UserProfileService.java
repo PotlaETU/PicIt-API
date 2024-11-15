@@ -214,7 +214,7 @@ public class UserProfileService {
         var userId = userRepository.findByUsername(name)
                 .map(User::getId)
                 .orElseThrow(() -> new UserNotFound("User not found"));
-        ResponseEntity<SuggestionsResponses[]> response = restTemplate.getForEntity(URL_SUGGESTIONS + "87dc60b7-8075-4b06-acc8-8b70d6d1e5e4", SuggestionsResponses[].class);
+        ResponseEntity<SuggestionsResponses[]> response = restTemplate.getForEntity(URL_SUGGESTIONS + userId, SuggestionsResponses[].class);
         SuggestionsResponses[] jsonResponse = response.getBody();
         if (jsonResponse == null) {
             throw new RuntimeException("Error getting suggestions");
