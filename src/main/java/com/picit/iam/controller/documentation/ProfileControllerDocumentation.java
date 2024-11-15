@@ -1,5 +1,6 @@
 package com.picit.iam.controller.documentation;
 
+import com.picit.iam.dto.user.SuggestedUserDto;
 import com.picit.iam.dto.user.UserProfileDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -9,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Tag(name = "Profile", description = "Profile management")
 public interface ProfileControllerDocumentation {
@@ -35,4 +38,11 @@ public interface ProfileControllerDocumentation {
     ResponseEntity<String> createProfile(Authentication authentication, @RequestBody(
             description = "The user profile data",
             required = true) UserProfileDto bio);
+
+    @Operation(summary = "Get profile suggestions", description = "Retrieves a list of profile suggestions for the authenticated user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile suggestions retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Profile suggestions not found")
+    })
+    List<SuggestedUserDto> getSuggestions(Authentication authentication);
 }
