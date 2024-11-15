@@ -1,6 +1,35 @@
 spring:
+  profiles:
+    active: env
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
   application:
     name: picit-api
+  data:
+    mongodb:
+      database: PicIt
 
 server:
   port: 8081
+
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY:123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123}
+    expiration-time: 3600000 # 1 hour in milliseconds
+    refresh-time: 604800000 # 1 week in milliseconds
+
+neo4j-sync:
+  uri: http://localhost:5000/sync-neo4j
+
+generate-ai-images:
+  uri: http://localhost:5000/api/v1/
+  uri-get-images: http://localhost:5000/api/v1/images/
+
+suggestion:
+  uri: http://localhost:5000/suggest-friends/
+
+springdoc:
+  show-actuator: true
