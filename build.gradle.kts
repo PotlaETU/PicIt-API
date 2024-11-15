@@ -6,7 +6,7 @@ plugins {
 val springCloudVersion by extra("2023.0.3")
 
 group = "com.picit"
-version = "0.0.1-SNAPSHOT"
+version = "1.0.0"
 
 java {
     toolchain {
