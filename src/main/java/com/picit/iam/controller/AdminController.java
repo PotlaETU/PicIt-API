@@ -1,5 +1,6 @@
 package com.picit.iam.controller;
 
+import com.picit.iam.controller.documentation.AdminControllerDocumentation;
 import com.picit.mongoutils.ExportAndImportService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/admin")
-public class AdminController {
+public class AdminController implements AdminControllerDocumentation {
 
     private final ExportAndImportService exportAndImportService;
 
