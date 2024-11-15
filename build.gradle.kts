@@ -6,7 +6,7 @@ plugins {
 val springCloudVersion by extra("2023.0.3")
 
 group = "com.picit"
-version = "0.0.1-SNAPSHOT"
+version = "1.0.0"
 
 java {
     toolchain {
@@ -39,6 +39,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.apache.commons:commons-csv:1.12.0")
     implementation("net.datafaker:datafaker:2.4.1")
+    implementation("com.github.spotbugs:spotbugs-annotations:4.8.6")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.2")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     compileOnly("org.projectlombok:lombok:1.18.34")
