@@ -9,6 +9,7 @@ import com.picit.post.entity.Post;
 import com.picit.post.repository.PostRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MongoFakerDatas {
@@ -87,10 +89,12 @@ public class MongoFakerDatas {
     @Bean
     CommandLineRunner commandLineRunner() {
         return args -> {
+            log.info("Generating {} fake users", 10);
             for (int i = 0; i < 10; i++) {
                 User user = this.buildFakeUser();
                 userRepository.save(user);
             }
+            log.info("Generating {} fake posts", 10);
             for (int i = 0; i < 10; i++) {
                 Post post = this.buildFakePost();
                 postRepository.save(post);
