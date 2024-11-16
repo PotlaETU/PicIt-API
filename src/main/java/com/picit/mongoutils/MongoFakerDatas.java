@@ -7,7 +7,6 @@ import com.picit.iam.repository.UserRepository;
 import com.picit.post.entity.Hobby;
 import com.picit.post.entity.Post;
 import com.picit.post.repository.PostRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;

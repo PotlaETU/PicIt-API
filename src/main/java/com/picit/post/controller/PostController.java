@@ -6,6 +6,7 @@ import com.picit.post.dto.PostRequestDto;
 import com.picit.post.services.PostService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +21,13 @@ public class PostController implements PostControllerDocumentation {
     private final PostService postService;
 
     @GetMapping("/user")
-    public List<PostDto> getPostUser(Authentication authentication, @RequestParam(required = false) String hobby) {
-        return postService.getPostsByUser(authentication.getName(), hobby);
+    public Page<PostDto> getPostUser(Authentication authentication, @RequestParam(required = false) String hobby, @RequestParam(defaultValue = "0") int page) {
+        return postService.getPostsByUser(authentication.getName(), hobby, page);
     }
 
     @GetMapping
-    public List<PostDto> getPosts(Authentication authentication, @RequestParam(required = false) String hobby) {
-        return postService.getPosts(authentication.getName(), hobby);
+    public Page<PostDto> getPosts(Authentication authentication, @RequestParam(required = false) String hobby, @RequestParam(defaultValue = "0") int page) {
+        return postService.getPosts(authentication.getName(), hobby, page);
     }
 
     @PostMapping
@@ -42,5 +43,10 @@ public class PostController implements PostControllerDocumentation {
     @PutMapping("/{id}")
     public PostDto updatePost(Authentication authentication, @PathVariable String id, @Valid @RequestBody PostRequestDto postDto) {
         return postService.updatePost(authentication.getName(), id, postDto);
+    }
+
+    @PostMapping("/search")
+    public List<PostDto> searchPost(Authentication authentication, @RequestParam String search) {
+        return postService.searchPost(authentication.getName(), search);
     }
 }
