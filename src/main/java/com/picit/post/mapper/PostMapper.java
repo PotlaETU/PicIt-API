@@ -1,7 +1,7 @@
 package com.picit.post.mapper;
 
 import com.picit.post.dto.PostDto;
-import com.picit.post.dto.PostRequestDto;
+import com.picit.post.dto.request.PostRequestDto;
 import com.picit.post.entity.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -17,6 +17,7 @@ public interface PostMapper {
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "userId", source = "id")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "postImage", ignore = true)
     Post postRequestDtoToPost(PostRequestDto postRequestDto, String id);
 
     @Mapping(target = "id", ignore = true)
@@ -25,5 +26,6 @@ public interface PostMapper {
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "postImage", ignore = true)
     Post updatePostFromPostRequestDto(PostRequestDto postRequestDto, @MappingTarget Post post);
 }

@@ -1,6 +1,5 @@
 package com.picit.iam.services;
 
-import com.picit.iam.dto.responseType.AIImagesResponse;
 import com.picit.iam.dto.responseType.SuggestionsResponses;
 import com.picit.iam.dto.user.SuggestedUserDto;
 import com.picit.iam.dto.user.UserProfileDto;
@@ -8,16 +7,19 @@ import com.picit.iam.entity.User;
 import com.picit.iam.entity.UserProfile;
 import com.picit.iam.entity.images.Image;
 import com.picit.iam.entity.images.ProfilePicImage;
+import com.picit.iam.entity.points.Points;
 import com.picit.iam.exceptions.UserNotFound;
 import com.picit.iam.mapper.UserMapper;
-import com.picit.iam.repository.ProfilePicRepository;
 import com.picit.iam.repository.UserProfileRepository;
 import com.picit.iam.repository.UserRepository;
+import com.picit.iam.repository.points.PointsRepository;
+import com.picit.iam.repository.profilepic.ProfilePicRepository;
 import com.picit.post.entity.Hobby;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,39 +38,25 @@ public class UserProfileService {
     private final UserRepository userRepository;
     private final ProfilePicRepository profilePicRepository;
     private final RestTemplate restTemplate = new RestTemplateBuilder().build();
+    private final PointsRepository pointsRepository;
 
     @Value("${generate-ai-images.uri}")
-    private String URL_AI;
+    private String urlAi;
 
     @Value("${generate-ai-images.uri-get-images}")
-    private String URL_AI_GET_IMAGES;
+    private String urlAiGetImages;
 
     @Value("${suggestion.uri}")
-    private String URL_SUGGESTIONS;
+    private String urlSuggestions;
 
-    public ResponseEntity<String> updateProfilePicture(String username, MultipartFile file, boolean aiGenerated) {
+    public ResponseEntity<String> updateProfilePicture(String username, MultipartFile file, Boolean aiGenerated) {
         var userProfile = getUserProfile(username)
                 .orElseThrow(() -> new UserNotFound("User not found"));
         if (file == null && !aiGenerated) {
             return ResponseEntity.badRequest().body("Please select a file to upload or set aiGenerated to true.");
         }
         if (aiGenerated) {
-            URL_AI = URL_AI + "generate_profile_pic";
-            AIImagesResponse res = restTemplate.postForEntity(URL_AI, null, AIImagesResponse.class).getBody();
-            if (res == null) {
-                return ResponseEntity.internalServerError().body("Error generating image");
-            }
-            var image = restTemplate.getForEntity(URL_AI_GET_IMAGES + "image_1.png", byte[].class).getBody();
-            if (image == null) {
-                return ResponseEntity.internalServerError().body("Error getting image");
-            }
-            var imageGenerated = ProfilePicImage.builder()
-                    .userId(userProfile.getUserId())
-                    .aiGenerated(true)
-                    .image(new Binary(image))
-                    .build();
-            profilePicRepository.save(imageGenerated);
-            return ResponseEntity.ok().build();
+            return generateProfilePicAI(userProfile);
         }
         try {
             if (file.isEmpty()) {
@@ -98,6 +86,12 @@ public class UserProfileService {
         userProfile.setHobbies(userProfileDto.hobbies());
         userProfile.setFollows(userProfileDto.follows());
 
+        Points points = Points.builder()
+                .userId(userProfile.getUserId())
+                .points(0)
+                .build();
+
+        pointsRepository.save(points);
         userProfileRepository.save(userProfile);
         return ResponseEntity.ok().build();
     }
@@ -213,10 +207,10 @@ public class UserProfileService {
         var userId = userRepository.findByUsername(name)
                 .map(User::getId)
                 .orElseThrow(() -> new UserNotFound("User not found"));
-        ResponseEntity<SuggestionsResponses[]> response = restTemplate.getForEntity(URL_SUGGESTIONS + userId, SuggestionsResponses[].class);
+        ResponseEntity<SuggestionsResponses[]> response = restTemplate.getForEntity(urlSuggestions + userId, SuggestionsResponses[].class);
         SuggestionsResponses[] jsonResponse = response.getBody();
         if (jsonResponse == null) {
-            throw new RuntimeException("Error getting suggestions");
+            throw new IllegalArgumentException("Error getting suggestions");
         }
         if (jsonResponse[0].error() != null) {
             throw new UserNotFound("User not found");
@@ -233,4 +227,47 @@ public class UserProfileService {
         }
         return suggestedUsers;
     }
+
+    public UserProfileDto getPoints(String name) {
+        var userId = getUser(name).getId();
+        var points = pointsRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFound("Points for user not found"));
+        return UserProfileDto.builder()
+                .points(points.getPoints())
+                .build();
+    }
+
+    public UserProfileDto getProfile(String username) {
+        var profile = getUserProfile(username)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        var points = pointsRepository.findByUserId(profile.getUserId())
+                .orElseThrow(() -> new UserNotFound("Points for user not found"));
+        return userProfileMapper.toUserProfileDto(profile, points);
+    }
+
+    private User getUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+    }
+
+    private ResponseEntity<String> generateProfilePicAI(UserProfile userProfile) {
+        urlAi = urlAi + "generate_profile_pic";
+        var res = restTemplate.postForEntity(urlAi, null, String.class);
+        if (res.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.internalServerError()
+                    .build();
+        }
+        var image = restTemplate.getForEntity(urlAiGetImages + "image_1.png", byte[].class).getBody();
+        if (image == null) {
+            return ResponseEntity.internalServerError().body("Error getting image");
+        }
+        var imageGenerated = ProfilePicImage.builder()
+                .userId(userProfile.getUserId())
+                .aiGenerated(true)
+                .image(new Binary(image))
+                .build();
+        profilePicRepository.save(imageGenerated);
+        return ResponseEntity.ok().build();
+    }
+
 }

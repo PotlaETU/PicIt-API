@@ -10,6 +10,7 @@ public record UserProfileDto(
         String username,
         String bio,
         List<Hobby> hobbies,
-        List<String> follows
+        List<String> follows,
+        int points
 ) {
 }

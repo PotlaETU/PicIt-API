@@ -1,7 +1,7 @@
 package com.picit.post.controller.documentation;
 
 import com.picit.post.dto.PostDto;
-import com.picit.post.dto.PostRequestDto;
+import com.picit.post.dto.request.PostRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

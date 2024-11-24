@@ -22,8 +22,13 @@ public class UserProfileController implements ProfileControllerDocumentation {
     @PostMapping("/picture")
     public ResponseEntity<String> addOrUpdateProfilePicture(Authentication authentication,
                                                             @RequestParam(value = "file", required = false) MultipartFile file,
-                                                            @RequestParam(value = "aiGenerated", required = false, defaultValue = "false") boolean aiGenerated) {
+                                                            @RequestParam(value = "aiGenerated", required = false, defaultValue = "false") Boolean aiGenerated) {
         return profileService.updateProfilePicture(authentication.getName(), file, aiGenerated);
+    }
+
+    @GetMapping
+    public UserProfileDto getProfile(Authentication authentication) {
+        return profileService.getProfile(authentication.getName());
     }
 
     @GetMapping("/picture")
@@ -69,6 +74,11 @@ public class UserProfileController implements ProfileControllerDocumentation {
     @GetMapping("/suggestions")
     public List<SuggestedUserDto> getSuggestions(Authentication authentication) {
         return profileService.getSuggestions(authentication.getName());
+    }
+
+    @GetMapping("/points")
+    public UserProfileDto getPoints(Authentication authentication) {
+        return profileService.getPoints(authentication.getName());
     }
 }
 
