@@ -11,4 +11,6 @@ public interface PostRepository extends MongoRepository<Post, String> {
     List<Post> findAllByUpdatedAtAfter(LocalDateTime lastSyncDate);
 
     Optional<List<Post>> findPostsByContentRegex(String content);
+
+    Boolean existsPostByUserIdAndCreatedAtAfter(String userId, LocalDateTime startOfDay);
 }

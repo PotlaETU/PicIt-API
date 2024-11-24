@@ -21,7 +21,7 @@ public interface ProfileControllerDocumentation {
             @ApiResponse(responseCode = "200", description = "Profile picture updated successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
-    ResponseEntity<String> addOrUpdateProfilePicture(Authentication authentication, MultipartFile file, boolean aiGenerated);
+    ResponseEntity<String> addOrUpdateProfilePicture(Authentication authentication, MultipartFile file, Boolean aiGenerated);
 
     @Operation(summary = "Get profile picture", description = "Retrieves the profile picture of the authenticated user")
     @ApiResponses(value = {

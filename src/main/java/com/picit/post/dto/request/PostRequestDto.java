@@ -1,4 +1,4 @@
-package com.picit.post.dto;
+package com.picit.post.dto.request;
 
 import com.picit.post.entity.Hobby;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,6 @@ import lombok.Builder;
 public record PostRequestDto(
         @NotBlank(message = "Content is required")
         String content,
-        String photoUrl,
         @NotNull(message = "Hobby is required")
         Hobby hobby,
         @NotNull(message = "Visibility is required")

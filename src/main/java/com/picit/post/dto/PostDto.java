@@ -15,7 +15,6 @@ public record PostDto(
         String id,
         String userId,
         String content,
-        String photoUrl,
         Hobby hobby,
         Boolean isPublic,
         List<Likes> likes,

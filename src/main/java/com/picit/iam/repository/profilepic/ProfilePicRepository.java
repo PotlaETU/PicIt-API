@@ -1,4 +1,4 @@
-package com.picit.iam.repository;
+package com.picit.iam.repository.profilepic;
 
 import com.picit.iam.entity.images.Image;
 import com.picit.iam.entity.images.ProfilePicImage;
