@@ -22,7 +22,7 @@ public class IamStepDefs {
     public void iCreateAnAccount() {
         SignUpRequest signUpRequest = SignUpRequest.builder()
                 .email("test@test.com")
-                .password("test")
+                .password("testTest")
                 .username("test")
                 .privacy(true)
                 .notifications(true)
@@ -44,7 +44,7 @@ public class IamStepDefs {
     public void iLoginToTheAccount() {
         LoginRequest loginRequest = LoginRequest.builder()
                 .email("test@test.com")
-                .password("test")
+                .password("testTest")
                 .build();
         response = restTemplate.postForEntity("http://localhost:8081/api/v1/iam/login", loginRequest, LoginResponse.class);
         assertNotNull(response);
