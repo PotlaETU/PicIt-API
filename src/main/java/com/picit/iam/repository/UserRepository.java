@@ -17,4 +17,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     boolean existsByEmail(@NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email);
 
     List<User> findAllByUpdatedAtAfter(LocalDateTime lastSyncDate);
+
+    Optional<User> findByEmail(String email);
 }
