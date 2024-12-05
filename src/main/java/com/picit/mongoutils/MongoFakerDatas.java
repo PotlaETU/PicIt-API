@@ -50,10 +50,6 @@ public class MongoFakerDatas {
         return faker.lorem().paragraph(3);
     }
 
-    private String getFakerTitle() {
-        return faker.lorem().characters(5, 10);
-    }
-
     public User buildFakeUser() {
         return User.builder()
                 .email(getFakerEmail())
