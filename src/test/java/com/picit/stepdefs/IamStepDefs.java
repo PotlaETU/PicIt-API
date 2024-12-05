@@ -33,6 +33,9 @@ public class IamStepDefs {
 
     @Then("the account should be created")
     public void theAccountShouldBeCreated() {
+        if (response.getBody() == null) {
+            throw new RuntimeException("Response body is null");
+        }
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("justo.vd", response.getBody().username());
     }
@@ -50,7 +53,7 @@ public class IamStepDefs {
     @Then("The account should be logged in")
     public void iShouldBeLoggedIn() {
         if (response.getBody() == null) {
-            return;
+            throw new RuntimeException("Response body is null");
         }
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("justo.vd", response.getBody().username());
