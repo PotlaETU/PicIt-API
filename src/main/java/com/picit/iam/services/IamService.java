@@ -77,14 +77,23 @@ public class IamService {
     }
 
     public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
-        logger.info("Login request received for username: {}", loginRequest.username());
+        User authUser;
+        if (loginRequest.username() == null && loginRequest.email() != null) {
+            authUser = userRepository.findByEmail(loginRequest.email()).orElseThrow(
+                    () -> new UserNotFound("User not found")
+            );
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authUser.getUsername(), loginRequest.password())
+            );
+        } else {
+            authUser = userRepository.findByUsername(loginRequest.username()).orElseThrow(
+                    () -> new UserNotFound("User not found")
+            );
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
+            );
+        }
 
-        User authUser = userRepository.findByUsername(loginRequest.username()).orElseThrow(
-                () -> new UserNotFound("User not found")
-        );
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
-        );
         String token = jwtUtil.generateToken(authUser);
         String refreshToken = jwtUtil.generateRefreshToken(authUser);
 
