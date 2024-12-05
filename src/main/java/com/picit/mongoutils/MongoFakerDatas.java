@@ -50,10 +50,6 @@ public class MongoFakerDatas {
         return faker.lorem().paragraph(3);
     }
 
-    private String getFakerTitle() {
-        return faker.lorem().characters(5, 10);
-    }
-
     public User buildFakeUser() {
         return User.builder()
                 .email(getFakerEmail())
@@ -88,6 +84,11 @@ public class MongoFakerDatas {
     @Bean
     CommandLineRunner commandLineRunner() {
         return args -> {
+            String activeProfile = System.getProperty("spring.profiles.active");
+            if ("production".equals(activeProfile) || "test".equals(activeProfile)) {
+                log.info("Skipping fake data generation in {} profile", activeProfile);
+                return;
+            }
             log.info("Generating {} fake users", 10);
             for (int i = 0; i < 10; i++) {
                 User user = this.buildFakeUser();
