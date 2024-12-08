@@ -3,6 +3,7 @@ package com.picit.iam.controller.documentation;
 import com.picit.iam.dto.login.LoginRequest;
 import com.picit.iam.dto.login.LoginResponse;
 import com.picit.iam.dto.login.SignUpRequest;
+import com.picit.iam.dto.responseType.MessageResponse;
 import com.picit.iam.dto.token.TokenRefreshRequest;
 import com.picit.iam.dto.token.TokenResponse;
 import com.picit.iam.dto.user.UserDto;
@@ -60,4 +61,12 @@ public interface IamControllerDocumentation {
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
     ResponseEntity<Void> logout(HttpServletRequest request);
+
+    @Operation(summary = "Reset the user's password", description = "Resets the user's password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password reset successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    ResponseEntity<MessageResponse> resetPassword(String oldPassword, String newPassword, Authentication authentication);
 }

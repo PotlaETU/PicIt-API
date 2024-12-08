@@ -11,6 +11,7 @@ spring:
   data:
     mongodb:
       database: PicIt
+      uri: ${SPRING_DATA_MONGODB_URI}
 
 server:
   port: 8081
