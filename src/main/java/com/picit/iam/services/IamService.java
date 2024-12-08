@@ -4,6 +4,7 @@ import com.picit.iam.auth.JwtUtil;
 import com.picit.iam.dto.login.LoginRequest;
 import com.picit.iam.dto.login.LoginResponse;
 import com.picit.iam.dto.login.SignUpRequest;
+import com.picit.iam.dto.responseType.MessageResponse;
 import com.picit.iam.dto.token.TokenRefreshRequest;
 import com.picit.iam.dto.token.TokenResponse;
 import com.picit.iam.dto.user.UserDto;
@@ -27,6 +28,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -153,7 +155,8 @@ public class IamService {
 
         ResponseCookie cookie = jwtUtil.getCleanJwtCookie();
         ResponseCookie refreshTokenCookie = jwtUtil.getCleanRefreshTokenCookie();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString(), refreshTokenCookie.toString())
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString(), refreshTokenCookie.toString())
                 .build();
 
     }
@@ -211,4 +214,23 @@ public class IamService {
     }
 
 
+    public ResponseEntity<MessageResponse> resetPassword(String oldPassword, String newPassword, String name) {
+        User user = userRepository.findByUsername(name).orElseThrow(
+                () -> new UserNotFound("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder()
+                            .message("Old password is incorrect")
+                            .timestamp(LocalDateTime.now())
+                            .build());
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return ResponseEntity.ok()
+                .body(MessageResponse.builder()
+                        .message("Password changed successfully")
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
 }
