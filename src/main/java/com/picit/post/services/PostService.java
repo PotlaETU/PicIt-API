@@ -110,7 +110,7 @@ public class PostService {
                 .map(User::getId)
                 .orElseThrow(() -> new UserNotFound("User not found"));
 
-        if (post.getPostImage() != null || (aiGenerated && postImageRequestDto.prompt() == null)) {
+        if (post.getPostImage() != null || (Boolean.TRUE.equals(aiGenerated) && postImageRequestDto.prompt() == null)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .build();
         }
@@ -118,7 +118,7 @@ public class PostService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .build();
         }
-        if (aiGenerated) {
+        if (Boolean.TRUE.equals(aiGenerated)) {
             return generatePostImageAi(postImageRequestDto.prompt());
         }
         try {
