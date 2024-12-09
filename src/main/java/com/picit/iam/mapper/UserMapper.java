@@ -23,6 +23,7 @@ public interface UserMapper {
     @Mapping(target = "points", ignore = true)
     UserProfileDto toUserProfileDto(UserProfile userProfile);
 
+    @Mapping(target = "points", source = "points.pointsNb")
     UserProfileDto toUserProfileDto(UserProfile userProfile, Points points);
 
     @Mapping(target = "id", source = "user.id")

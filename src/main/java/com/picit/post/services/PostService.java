@@ -17,7 +17,6 @@ import com.picit.post.mapper.PostMapper;
 import com.picit.post.repository.PostRepository;
 import com.picit.post.repository.postpic.PostImageRepository;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Value;
@@ -97,7 +96,7 @@ public class PostService {
         if (isFirstPostPosted(user.getId())) {
             var points = pointsRepository.findByUserId(user.getId())
                     .orElseThrow(() -> new UserNotFound("User has no points"));
-            points.setPoints(points.getPoints() + PointDefinition.CREATE_POST.getPoints());
+            points.setPointsNb(points.getPointsNb() + PointDefinition.CREATE_POST.getPoints());
             pointsRepository.save(points);
         }
         postRepository.save(post);
@@ -128,7 +127,7 @@ public class PostService {
                     .userId(userId)
                     .aiGenerated(false)
                     .description(postImageRequestDto.description())
-                    .image(new Binary(file.getBytes()))
+                    .imageBinary(new Binary(file.getBytes()))
                     .build();
             postImageRepository.save(profilePicture);
             post.setPostImage(profilePicture);
@@ -203,7 +202,7 @@ public class PostService {
         try {
             var postImage = PostImage.builder()
                     .aiGenerated(true)
-                    .image(new Binary(image))
+                    .imageBinary(new Binary(image))
                     .description(prompt)
                     .build();
             postImageRepository.save(postImage);
