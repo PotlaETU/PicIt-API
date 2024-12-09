@@ -3,6 +3,7 @@ plugins {
     id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.1.6"
     id("org.sonarqube") version "5.1.0.4882"
+    jacoco
 }
 val springCloudVersion by extra("2023.0.3")
 
@@ -20,6 +21,25 @@ sonar {
         property("sonar.projectKey", "PicIt")
         property("sonar.host.url", "https://sonarqube.univ-artois.fr")
     }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+    dependsOn(tasks.test)
+}
+
+tasks.sonarqube {
+    dependsOn(tasks.test)
 }
 
 configurations {

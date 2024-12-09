@@ -30,8 +30,12 @@ public class MessageService {
                 .timestamp(chatMessage.createdAt())
                 .build();
         messageRepository.save(message);
-        headerAccessor.getSessionAttributes().put("username", chatMessage.senderId());
-        brokerMessagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
+        if (headerAccessor.getSessionAttributes() != null) {
+            headerAccessor.getSessionAttributes().put("username", chatMessage.senderId());
+            brokerMessagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
+        } else {
+            log.error("HeaderAccessor is null");
+        }
     }
 
     public Room getOrCreateRoom(List<String> users) {

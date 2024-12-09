@@ -179,7 +179,7 @@ public class IamService {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .path("/")
-                .maxAge(3600 * 24 * 7)
+                .maxAge(3600L * 24 * 7)
                 .sameSite("Strict")
                 .build();
         return List.of(jwtCookie, refreshTokenCookie);
