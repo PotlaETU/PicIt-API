@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -30,11 +31,12 @@ public class MessageService {
                 .timestamp(chatMessage.createdAt())
                 .build();
         messageRepository.save(message);
-        if (headerAccessor.getSessionAttributes() != null) {
-            headerAccessor.getSessionAttributes().put("username", chatMessage.senderId());
-            brokerMessagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
-        } else {
+        var sessionAttributes = headerAccessor.getSessionAttributes();
+        if (sessionAttributes == null) {
             log.error("HeaderAccessor is null");
+        } else {
+            sessionAttributes.put("username", chatMessage.senderId());
+            brokerMessagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
         }
     }
 

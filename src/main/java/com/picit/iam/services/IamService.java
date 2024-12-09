@@ -4,7 +4,7 @@ import com.picit.iam.auth.JwtUtil;
 import com.picit.iam.dto.login.LoginRequest;
 import com.picit.iam.dto.login.LoginResponse;
 import com.picit.iam.dto.login.SignUpRequest;
-import com.picit.iam.dto.responseType.MessageResponse;
+import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.iam.dto.token.TokenRefreshRequest;
 import com.picit.iam.dto.token.TokenResponse;
 import com.picit.iam.dto.user.UserDto;
@@ -44,6 +44,7 @@ public class IamService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final Logger logger = LoggerFactory.getLogger(IamService.class);
     private final UserProfileRepository userProfileRepository;
+    private static final String USER_NOT_FOUND = "User not found";
 
     public ResponseEntity<LoginResponse> signUp(SignUpRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.username()) || userRepository.existsByEmail(signUpRequest.email())) {
@@ -72,7 +73,9 @@ public class IamService {
         ResponseCookie refreshTokenCookie = generateCookies(token, refreshToken).get(1);
         var loginResponse = setCookiesAndLoginResponse(token, refreshToken, user);
 
-        logger.info("SignUp response generated for username: {}", signUpRequest.username());
+        if (logger.isInfoEnabled()) {
+            logger.info("SignUp response generated for username: {}", signUpRequest.username());
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString(), refreshTokenCookie.toString())
                 .body(loginResponse);
@@ -82,14 +85,14 @@ public class IamService {
         User authUser;
         if (loginRequest.username() == null && loginRequest.email() != null) {
             authUser = userRepository.findByEmail(loginRequest.email()).orElseThrow(
-                    () -> new UserNotFound("User not found")
+                    () -> new UserNotFound(USER_NOT_FOUND)
             );
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authUser.getUsername(), loginRequest.password())
             );
         } else {
             authUser = userRepository.findByUsername(loginRequest.username()).orElseThrow(
-                    () -> new UserNotFound("User not found")
+                    () -> new UserNotFound(USER_NOT_FOUND)
             );
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
@@ -103,7 +106,10 @@ public class IamService {
         ResponseCookie refreshTokenCookie = generateCookies(token, refreshToken).get(1);
         var loginResponse = setCookiesAndLoginResponse(token, refreshToken, authUser);
 
-        logger.info("Login response generated for username: {}", loginRequest.username());
+        if (logger.isInfoEnabled()) {
+            logger.info("Login response generated for username: {}", loginRequest.username());
+        }
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString(), refreshTokenCookie.toString())
                 .body(loginResponse);
@@ -117,7 +123,7 @@ public class IamService {
         String usernameToken = jwtUtil.extractUsername(refreshToken);
 
         User user = userRepository.findByUsername(usernameToken).orElseThrow(
-                () -> new UserNotFound("User not found")
+                () -> new UserNotFound(USER_NOT_FOUND)
         );
         if (jwtUtil.isTokenExpired(refreshToken) || !username.equals(usernameToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -148,7 +154,7 @@ public class IamService {
         String username = jwtUtil.extractUsername(token);
 
         User authUser = userRepository.findByUsername(username).orElseThrow(
-                () -> new UserNotFound("User not found")
+                () -> new UserNotFound(USER_NOT_FOUND)
         );
 
         userRepository.save(authUser);
@@ -163,7 +169,7 @@ public class IamService {
 
     public UserDto getUser(String username) {
         var user = userRepository.findByUsername(username).orElseThrow(
-                () -> new UserNotFound("User not found"));
+                () -> new UserNotFound(USER_NOT_FOUND));
         var userProfile = userProfileRepository.findByUserId(user.getId());
         return userMapper.toUserDto(user, userProfile);
     }
@@ -216,7 +222,7 @@ public class IamService {
 
     public ResponseEntity<MessageResponse> resetPassword(String oldPassword, String newPassword, String name) {
         User user = userRepository.findByUsername(name).orElseThrow(
-                () -> new UserNotFound("User not found"));
+                () -> new UserNotFound(USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

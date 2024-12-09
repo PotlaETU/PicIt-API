@@ -13,5 +13,6 @@ public class ProfilePicImage extends Image {
     private String userId;
 
     public ProfilePicImage() {
+        // Needed to retrieve the object from the database
     }
 }

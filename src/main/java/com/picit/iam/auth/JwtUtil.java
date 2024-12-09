@@ -17,6 +17,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
+    private static final String USERNAME = "username";
+
     @Value("${security.jwt.secret-key}")
     private String secret;
 
@@ -43,7 +45,7 @@ public class JwtUtil {
 
     public String generateRefreshToken(User user) {
         return Jwts.builder()
-                .claim("username", user.getUsername())
+                .claim(USERNAME, user.getUsername())
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole())
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -54,7 +56,7 @@ public class JwtUtil {
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .claim("username", user.getUsername())
+                .claim(USERNAME, user.getUsername())
                 .claim("email", user.getEmail())
                 .claim("role", user.getRole())
                 .subject(user.getId())
@@ -78,7 +80,7 @@ public class JwtUtil {
     }
 
     public String extractUsername(String token) {
-        return extractAllClaims(token).get("username", String.class);
+        return extractAllClaims(token).get(USERNAME, String.class);
     }
 
     public String extractUserId(String token) {

@@ -16,5 +16,6 @@ public class PostImage extends Image {
     private String description;
 
     public PostImage() {
+        // Needed to retrieve the object from the database
     }
 }

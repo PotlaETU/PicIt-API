@@ -4,7 +4,7 @@ import com.picit.iam.controller.documentation.IamControllerDocumentation;
 import com.picit.iam.dto.login.LoginRequest;
 import com.picit.iam.dto.login.LoginResponse;
 import com.picit.iam.dto.login.SignUpRequest;
-import com.picit.iam.dto.responseType.MessageResponse;
+import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.iam.dto.token.TokenRefreshRequest;
 import com.picit.iam.dto.token.TokenResponse;
 import com.picit.iam.dto.user.UserDto;
