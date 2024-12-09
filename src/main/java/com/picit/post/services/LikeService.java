@@ -26,7 +26,7 @@ public class LikeService {
                 .orElseThrow(() -> new PostNotFound("Post not found"));
         var points = pointsRepository.findByUserId(post.getUserId())
                 .orElseThrow(() -> new UserNotFound("User not found"));
-        points.setPoints(points.getPoints() + PointDefinition.LIKE_POST.getPoints());
+        points.setPointsNb(points.getPointsNb() + PointDefinition.LIKE_POST.getPoints());
         pointsRepository.save(points);
 
         var userId = getUserId(username);
@@ -48,7 +48,7 @@ public class LikeService {
                 .orElseThrow(() -> new PostNotFound("Post not found"));
         var points = pointsRepository.findByUserId(post.getUserId())
                 .orElseThrow(() -> new UserNotFound("User not found"));
-        points.setPoints(points.getPoints() - PointDefinition.DISLIKE_POST.getPoints());
+        points.setPointsNb(points.getPointsNb() - PointDefinition.DISLIKE_POST.getPoints());
         pointsRepository.save(points);
 
         likesRepository.delete(like);
