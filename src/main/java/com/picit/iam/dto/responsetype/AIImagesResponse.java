@@ -1,4 +1,4 @@
-package com.picit.iam.dto.responseType;
+package com.picit.iam.dto.responsetype;
 
 public record AIImagesResponse(
         String image1,

@@ -4,17 +4,17 @@ import org.springframework.data.mongodb.core.query.Criteria;
 
 import java.util.List;
 
-public abstract class PostCriteria {
+public interface PostCriteria {
 
-    public static Criteria postsByUserId(String userId) {
+    static Criteria postsByUserId(String userId) {
         return Criteria.where("userId").is(userId);
     }
 
-    public static Criteria postsByHobby(String hobby) {
+    static Criteria postsByHobby(String hobby) {
         return Criteria.where("hobbies").is(hobby);
     }
 
-    public static Criteria postsVisibility(List<String> follows) {
+    static Criteria postsVisibility(List<String> follows) {
         return Criteria.where("userId").in(follows)
                 .orOperator(Criteria.where("isPublic").is(true));
     }

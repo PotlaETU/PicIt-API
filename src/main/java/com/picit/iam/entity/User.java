@@ -32,7 +32,7 @@ public class User implements UserDetails {
 
     private String password;
 
-    private Settings settings;
+    private transient Settings settings;
 
     private LocalDateTime createdAt;
 
@@ -40,7 +40,7 @@ public class User implements UserDetails {
 
     private String role;
 
-    private UserProfile userProfile;
+    private transient UserProfile userProfile;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

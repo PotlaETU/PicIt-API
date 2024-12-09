@@ -19,11 +19,13 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
     private final UserRepository userRepository;
+    private static final String COMMENT_NOT_FOUND = "Comment not found";
+    private static final String USER_NOT_FOUND = "User not found";
 
     public CommentDto createComment(String username, CommentRequestDto commentRequestDto) {
         var userId = userRepository.findByUsername(username)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         Comment comment = commentMapper.commentRequestDtoToComment(commentRequestDto, userId);
         var commentSaved = commentRepository.save(comment);
@@ -33,9 +35,9 @@ public class CommentService {
     public ResponseEntity<Void> deleteComment(String username, String commentId) {
         var userId = userRepository.findByUsername(username)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new UserNotFound("Comment not found"));
+                .orElseThrow(() -> new UserNotFound(COMMENT_NOT_FOUND));
 
         if (!userId.equals(comment.getUserId())) {
             return ResponseEntity.status(403).build();
@@ -48,10 +50,10 @@ public class CommentService {
     public ResponseEntity<CommentDto> updateComment(String name, CommentRequestDto commentRequestDto) {
         var userId = userRepository.findByUsername(name)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         var comment = commentRepository.findById(commentRequestDto.commentId())
-                .orElseThrow(() -> new UserNotFound("Comment not found"));
+                .orElseThrow(() -> new UserNotFound(COMMENT_NOT_FOUND));
         if (comment.getContent().isBlank()) {
             return ResponseEntity.status(400).build();
         }

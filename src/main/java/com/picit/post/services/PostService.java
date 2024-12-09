@@ -48,6 +48,8 @@ public class PostService {
     private final PointsRepository pointsRepository;
     private final PostImageRepository postImageRepository;
     private final RestTemplate restTemplate = new RestTemplateBuilder().build();
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String POST_NOT_FOUND = "Post not found";
 
     @Value("${generate-ai-images.uri}")
     private String urlAi;
@@ -59,7 +61,7 @@ public class PostService {
         int pageSize = 10;
         var userId = userRepository.findByUsername(username)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var query = new Query(PostCriteria.postsByUserId(userId));
         return getPostDtos(hobby, page, pageSize, query);
     }
@@ -67,7 +69,7 @@ public class PostService {
     public Page<PostDto> getPosts(String username, String hobby, int page) {
         int pageSize = 10;
         var userProfile = userProfileRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
         return getPostDtos(hobby, page, pageSize, query);
@@ -91,9 +93,9 @@ public class PostService {
 
     public PostDto createPost(String username, PostRequestDto postDto) {
         var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var post = postMapper.postRequestDtoToPost(postDto, user.getId());
-        if (isFirstPostPosted(user.getId())) {
+        if (Boolean.TRUE.equals(isFirstPostPosted(user.getId()))) {
             var points = pointsRepository.findByUserId(user.getId())
                     .orElseThrow(() -> new UserNotFound("User has no points"));
             points.setPointsNb(points.getPointsNb() + PointDefinition.CREATE_POST.getPoints());
@@ -105,10 +107,10 @@ public class PostService {
 
     public ResponseEntity<String> setPostImage(MultipartFile file, String username, String postId, Boolean aiGenerated, PostImageRequestDto postImageRequestDto) {
         var post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFound("Post not found"));
+                .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         var userId = userRepository.findByUsername(username)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         if (post.getPostImage() != null || (Boolean.TRUE.equals(aiGenerated) && postImageRequestDto.prompt() == null)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -141,10 +143,10 @@ public class PostService {
 
     public ResponseEntity<Void> deletePost(String username, String postId) {
         var post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFound("Post not found"));
+                .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         var userId = userRepository.findByUsername(username)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         if (!post.getUserId().equals(userId)) {
             return ResponseEntity.badRequest().build();
@@ -155,10 +157,10 @@ public class PostService {
 
     public PostDto updatePost(String username, String postId, PostRequestDto postDto) {
         var post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFound("Post not found"));
+                .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         var userId = userRepository.findByUsername(username)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         if (!post.getUserId().equals(userId)) {
             throw new IllegalArgumentException("User is not the owner of the post");
         }
@@ -169,10 +171,10 @@ public class PostService {
 
     public List<PostDto> searchPost(String username, String search) {
         var userProfile = userProfileRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
         List<Post> posts = postRepository.findPostsByContentRegex(".*" + search + ".*")
-                .orElseThrow(() -> new PostNotFound("Post not found"));
+                .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         List<Post> postsForUser = mongoTemplate.find(query, Post.class)
                 .stream()
                 .filter(posts::contains)

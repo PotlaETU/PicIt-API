@@ -1,4 +1,4 @@
-package com.picit.iam.dto.responseType;
+package com.picit.iam.dto.responsetype;
 
 import lombok.Builder;
 

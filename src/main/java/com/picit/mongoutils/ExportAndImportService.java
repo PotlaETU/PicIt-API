@@ -2,6 +2,7 @@ package com.picit.mongoutils;
 
 import com.picit.iam.entity.User;
 import com.picit.iam.repository.UserRepository;
+import com.picit.mongoutils.exception.ExportException;
 import com.picit.post.entity.Post;
 import com.picit.post.repository.PostRepository;
 import lombok.AllArgsConstructor;
@@ -49,7 +50,7 @@ public class ExportAndImportService {
             printer.flush();
             return ResponseEntity.ok().build();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write users to csv file", e);
+            throw new ExportException("Failed to write users to csv file", e);
         }
     }
 
@@ -67,7 +68,7 @@ public class ExportAndImportService {
             printer.flush();
             return ResponseEntity.ok().build();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write posts to csv file", e);
+            throw new ExportException("Failed to write posts to csv file", e);
         }
 
     }

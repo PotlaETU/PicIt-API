@@ -25,7 +25,7 @@ public class MongoSyncService {
     private LocalDateTime lastSyncDate = LocalDateTime.now();
 
     @Value("${neo4j-sync.uri}")
-    private String NEO4J_URL;
+    private String neo4JUrl;
 
     public MongoSyncService(UserRepository userRepository, PostRepository postRepository, RestTemplateBuilder builder) {
         this.userRepository = userRepository;
@@ -40,8 +40,8 @@ public class MongoSyncService {
 
         lastSyncDate = LocalDateTime.now();
 
-        restTemplate.postForObject(NEO4J_URL + "/users", usersToSync, Void.class);
-        restTemplate.postForObject(NEO4J_URL + "/posts", postsToSync, Void.class);
+        restTemplate.postForObject(neo4JUrl + "/users", usersToSync, Void.class);
+        restTemplate.postForObject(neo4JUrl + "/posts", postsToSync, Void.class);
     }
 
 }

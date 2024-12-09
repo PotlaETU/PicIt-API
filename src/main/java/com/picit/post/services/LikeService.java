@@ -20,12 +20,13 @@ public class LikeService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PointsRepository pointsRepository;
+    private static final String USER_NOT_FOUND = "User not found";
 
     public ResponseEntity<Void> likePost(String username, String postId) {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFound("Post not found"));
         var points = pointsRepository.findByUserId(post.getUserId())
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         points.setPointsNb(points.getPointsNb() + PointDefinition.LIKE_POST.getPoints());
         pointsRepository.save(points);
 
@@ -47,7 +48,7 @@ public class LikeService {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFound("Post not found"));
         var points = pointsRepository.findByUserId(post.getUserId())
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         points.setPointsNb(points.getPointsNb() - PointDefinition.DISLIKE_POST.getPoints());
         pointsRepository.save(points);
 
@@ -60,6 +61,6 @@ public class LikeService {
     private String getUserId(String username) {
         return userRepository.findByUsername(username)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
     }
 }

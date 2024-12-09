@@ -1,6 +1,6 @@
 package com.picit.iam.services;
 
-import com.picit.iam.dto.responseType.SuggestionsResponses;
+import com.picit.iam.dto.responsetype.SuggestionsResponses;
 import com.picit.iam.dto.user.SuggestedUserDto;
 import com.picit.iam.dto.user.UserProfileDto;
 import com.picit.iam.entity.User;
@@ -39,6 +39,7 @@ public class UserProfileService {
     private final ProfilePicRepository profilePicRepository;
     private final RestTemplate restTemplate = new RestTemplateBuilder().build();
     private final PointsRepository pointsRepository;
+    private static final String USER_NOT_FOUND = "User not found";
 
     @Value("${generate-ai-images.uri}")
     private String urlAi;
@@ -51,11 +52,11 @@ public class UserProfileService {
 
     public ResponseEntity<String> updateProfilePicture(String username, MultipartFile file, Boolean aiGenerated) {
         var userProfile = getUserProfile(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
-        if (file == null && !aiGenerated) {
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        if (file == null && !Boolean.TRUE.equals(aiGenerated)) {
             return ResponseEntity.badRequest().body("Please select a file to upload or set aiGenerated to true.");
         }
-        if (aiGenerated) {
+        if (Boolean.TRUE.equals(aiGenerated)) {
             return generateProfilePicAI(userProfile);
         }
         try {
@@ -81,7 +82,7 @@ public class UserProfileService {
 
     public ResponseEntity<String> createProfile(String username, UserProfileDto userProfileDto) {
         var userProfile = getUserProfile(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         userProfile.setBio(userProfileDto.bio());
         userProfile.setHobbies(userProfileDto.hobbies());
         userProfile.setFollows(userProfileDto.follows());
@@ -98,7 +99,7 @@ public class UserProfileService {
 
     public ResponseEntity<String> updateHobbies(String username, List<Hobby> hobbies) {
         var userProfile = getUserProfile(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         userProfile.setHobbies(hobbies);
         userProfileRepository.save(userProfile);
         return ResponseEntity.ok().build();
@@ -106,7 +107,7 @@ public class UserProfileService {
 
     public ResponseEntity<byte[]> getProfilePicture(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var userProfile = userProfileRepository.findByUserId(user.getId());
 
         Image profilePic = userProfile.getProfilePicture();
@@ -125,7 +126,7 @@ public class UserProfileService {
 
     private Optional<UserProfile> getUserProfile(String username) {
         var userId = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"))
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND))
                 .getId();
         var userProfile = userProfileRepository.findByUserId(userId);
         if (userProfile == null) {
@@ -136,7 +137,7 @@ public class UserProfileService {
 
     public List<UserProfileDto> searchProfiles(String query) {
         var profile = userProfileRepository.findByUsernameRegex(".*" + query + ".*")
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         return profile.stream()
                 .map(userProfileMapper::toUserProfileDto)
@@ -145,9 +146,9 @@ public class UserProfileService {
 
     public ResponseEntity<Void> blockUser(String name, String usernameUserToBlock) {
         var userProfile = getUserProfile(name)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var userToBlock = userRepository.findByUsername(usernameUserToBlock)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         userProfile.getBlockedUsers().add(userToBlock.getId());
         userProfileRepository.save(userProfile);
         return ResponseEntity.ok().build();
@@ -155,9 +156,9 @@ public class UserProfileService {
 
     public ResponseEntity<Void> followUser(String name, String usernameUserToFollow) {
         var userProfile = getUserProfile(name)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var userToFollow = userRepository.findByUsername(usernameUserToFollow)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         userProfile.getFollows().add(userToFollow.getId());
         var userToFollowProfile = userProfileRepository.findByUserId(userToFollow.getId());
         userToFollowProfile.getFollowers().add(userProfile.getUserId());
@@ -168,7 +169,7 @@ public class UserProfileService {
 
     public List<UserProfileDto> getFollowing(String name) {
         var userProfile = getUserProfile(name)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         List<UserProfile> userFollows = new ArrayList<>();
         userProfile.getFollows()
                 .forEach(s -> userFollows.add(userProfileRepository.findByUserId(s)));
@@ -180,7 +181,7 @@ public class UserProfileService {
 
     public List<UserProfileDto> getFollowers(String name) {
         var userProfile = getUserProfile(name)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         List<UserProfile> userFollows = new ArrayList<>();
         userProfile.getFollowers()
                 .forEach(s -> userFollows.add(userProfileRepository.findByUserId(s)));
@@ -192,9 +193,9 @@ public class UserProfileService {
 
     public ResponseEntity<String> unfollowUser(String name, String username) {
         var userProfile = getUserProfile(name)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var userToUnfollow = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         userProfile.getFollows().remove(userToUnfollow.getId());
         var userToUnfollowProfile = userProfileRepository.findByUserId(userToUnfollow.getId());
         userToUnfollowProfile.getFollowers().remove(userProfile.getUserId());
@@ -206,19 +207,19 @@ public class UserProfileService {
     public List<SuggestedUserDto> getSuggestions(String name) {
         var userId = userRepository.findByUsername(name)
                 .map(User::getId)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         ResponseEntity<SuggestionsResponses[]> response = restTemplate.getForEntity(urlSuggestions + userId, SuggestionsResponses[].class);
         SuggestionsResponses[] jsonResponse = response.getBody();
         if (jsonResponse == null) {
             throw new IllegalArgumentException("Error getting suggestions");
         }
         if (jsonResponse[0].error() != null) {
-            throw new UserNotFound("User not found");
+            throw new UserNotFound(USER_NOT_FOUND);
         }
         List<SuggestedUserDto> suggestedUsers = new ArrayList<>();
         for (SuggestionsResponses suggestionsResponses : jsonResponse) {
             var userProfile = userProfileRepository.findByUsernameRegex(suggestionsResponses.username())
-                    .orElseThrow(() -> new UserNotFound("User not found"));
+                    .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
             SuggestedUserDto suggestedUser = SuggestedUserDto.builder()
                     .userProfile(userProfileMapper.toUserProfileDto(userProfile.getFirst()))
                     .commonHobbies(suggestionsResponses.commonHobbies())
@@ -239,7 +240,7 @@ public class UserProfileService {
 
     public UserProfileDto getProfile(String username) {
         var profile = getUserProfile(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var points = pointsRepository.findByUserId(profile.getUserId())
                 .orElseThrow(() -> new UserNotFound("Points for user not found"));
         return userProfileMapper.toUserProfileDto(profile, points);
@@ -247,7 +248,7 @@ public class UserProfileService {
 
     private User getUser(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
     }
 
     private ResponseEntity<String> generateProfilePicAI(UserProfile userProfile) {
