@@ -39,7 +39,7 @@ tasks.jacocoTestReport {
 }
 
 tasks.sonarqube {
-    dependsOn(tasks.test)
+    dependsOn(tasks.jacocoTestReport)
 }
 
 configurations {
