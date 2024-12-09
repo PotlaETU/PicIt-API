@@ -65,7 +65,7 @@ public class UserProfileService {
 
             ProfilePicImage profilePicture = ProfilePicImage.builder()
                     .userId(userProfile.getUserId())
-                    .image(new Binary(file.getBytes()))
+                    .imageBinary(new Binary(file.getBytes()))
                     .aiGenerated(false)
                     .build();
 
@@ -88,7 +88,7 @@ public class UserProfileService {
 
         Points points = Points.builder()
                 .userId(userProfile.getUserId())
-                .points(0)
+                .pointsNb(0)
                 .build();
 
         pointsRepository.save(points);
@@ -113,7 +113,7 @@ public class UserProfileService {
         if (profilePic != null) {
             byte[] profilePicData = userProfile
                     .getProfilePicture()
-                    .getImage()
+                    .getImageBinary()
                     .getData();
             return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_PNG)
@@ -233,7 +233,7 @@ public class UserProfileService {
         var points = pointsRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotFound("Points for user not found"));
         return UserProfileDto.builder()
-                .points(points.getPoints())
+                .points(points.getPointsNb())
                 .build();
     }
 
@@ -264,7 +264,7 @@ public class UserProfileService {
         var imageGenerated = ProfilePicImage.builder()
                 .userId(userProfile.getUserId())
                 .aiGenerated(true)
-                .image(new Binary(image))
+                .imageBinary(new Binary(image))
                 .build();
         profilePicRepository.save(imageGenerated);
         return ResponseEntity.ok().build();

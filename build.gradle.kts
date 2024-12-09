@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.3.5"
     id("io.spring.dependency-management") version "1.1.6"
+    id("org.sonarqube") version "5.1.0.4882"
 }
 val springCloudVersion by extra("2023.0.3")
 
@@ -11,6 +12,13 @@ version = "1.3.1"
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "PicIt")
+        property("sonar.host.url", "https://sonarqube.univ-artois.fr")
     }
 }
 

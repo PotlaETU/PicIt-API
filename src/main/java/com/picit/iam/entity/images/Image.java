@@ -14,6 +14,6 @@ import org.springframework.data.annotation.Id;
 public abstract class Image {
     @Id
     private String id;
-    private Binary image;
+    private Binary imageBinary;
     private Boolean aiGenerated;
 }

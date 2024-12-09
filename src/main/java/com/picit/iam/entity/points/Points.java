@@ -16,5 +16,5 @@ public class Points {
 
     private String userId;
 
-    private int points;
+    private int pointsNb;
 }
