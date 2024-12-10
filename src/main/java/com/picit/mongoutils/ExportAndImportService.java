@@ -49,7 +49,7 @@ public class ExportAndImportService {
              CSVPrinter printer = new CSVPrinter(new OutputStreamWriter(fos), CSVFormat.DEFAULT)) {
             for (User user : users) {
                 printer.printRecord(user.getId(), user.getUsername(),
-                        user.getEmail(), user.getPassword(), user.getRole());
+                        user.getEmail(), user.getRole(), user.getSettings(), user.getCreatedAt(), user.getUpdatedAt());
             }
             printer.flush();
             return ResponseEntity.ok(MessageResponse.builder()
