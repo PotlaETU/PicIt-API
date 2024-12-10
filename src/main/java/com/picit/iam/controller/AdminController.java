@@ -1,6 +1,7 @@
 package com.picit.iam.controller;
 
 import com.picit.iam.controller.documentation.AdminControllerDocumentation;
+import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.mongoutils.ExportAndImportService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class AdminController implements AdminControllerDocumentation {
 
     @GetMapping("/backup")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Void> backupDataCsv(@RequestParam("collection") String collectionName) {
+    public ResponseEntity<MessageResponse> backupDataCsv(@RequestParam("collection") String collectionName) {
         return exportAndImportService.backupDataCsv(collectionName);
     }
 }

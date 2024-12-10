@@ -1,5 +1,6 @@
 package com.picit.iam.controller.documentation;
 
+import com.picit.iam.dto.responsetype.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -14,5 +15,5 @@ public interface AdminControllerDocumentation {
             @ApiResponse(responseCode = "200", description = "Data backed up successfully to src/main/resources/static"),
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
-    ResponseEntity<Void> backupDataCsv(String collectionName);
+    ResponseEntity<MessageResponse> backupDataCsv(String collectionName);
 }
