@@ -13,7 +13,7 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "role", expression = "java(\"ROLE_USER\")")
+    @Mapping(target = "role", expression = "java(com.picit.iam.entity.UserRole.ROLE_USER)")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "settings", ignore = true)
