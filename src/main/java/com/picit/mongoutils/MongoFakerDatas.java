@@ -3,6 +3,7 @@ package com.picit.mongoutils;
 import com.picit.iam.entity.Settings;
 import com.picit.iam.entity.User;
 import com.picit.iam.entity.UserProfile;
+import com.picit.iam.entity.UserRole;
 import com.picit.iam.repository.UserRepository;
 import com.picit.post.entity.Hobby;
 import com.picit.post.entity.Post;
@@ -55,7 +56,7 @@ public class MongoFakerDatas {
                 .email(getFakerEmail())
                 .username(getFakerUsername())
                 .password(getFakerPassword())
-                .role("FAKE_USER")
+                .role(UserRole.ROLE_FAKE_USER)
                 .userProfile(UserProfile.builder()
                         .followers(List.of(faker.internet().uuid(), faker.internet().uuid(), faker.internet().uuid(), faker.internet().uuid()))
                         .username(getFakerUsername())
