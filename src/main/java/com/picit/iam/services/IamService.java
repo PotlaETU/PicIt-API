@@ -239,4 +239,19 @@ public class IamService {
                         .timestamp(LocalDateTime.now())
                         .build());
     }
+
+    public ResponseEntity<MessageResponse> validate(String token) {
+        if (jwtUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder()
+                            .message("Token is expired")
+                            .timestamp(LocalDateTime.now())
+                            .build());
+        }
+        return ResponseEntity.ok()
+                .body(MessageResponse.builder()
+                        .message("Token is valid")
+                        .timestamp(LocalDateTime.now())
+                        .build());
+    }
 }

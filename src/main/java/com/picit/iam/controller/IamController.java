@@ -57,4 +57,9 @@ public class IamController implements IamControllerDocumentation {
                                                          Authentication authentication) {
         return iamService.resetPassword(oldPassword, newPassword, authentication.getName());
     }
+
+    @PostMapping("/validate")
+    public ResponseEntity<MessageResponse> validate(@RequestParam(name = "token") String token) {
+        return iamService.validate(token);
+    }
 }
