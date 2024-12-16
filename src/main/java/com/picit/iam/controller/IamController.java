@@ -18,8 +18,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/iam")
 @AllArgsConstructor
+@CrossOrigin(maxAge = 3600, origins = "*")
+@RequestMapping("/api/v1/iam")
 public class IamController implements IamControllerDocumentation {
 
     private final IamService iamService;
@@ -63,3 +64,4 @@ public class IamController implements IamControllerDocumentation {
         return iamService.validate(token);
     }
 }
+

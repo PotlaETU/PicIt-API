@@ -83,6 +83,7 @@ public class IamService {
 
     public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
         User authUser;
+        logger.info("Login request received for username: {}", loginRequest.username());
         if (loginRequest.username() == null && loginRequest.email() != null) {
             authUser = userRepository.findByEmail(loginRequest.email()).orElseThrow(
                     () -> new UserNotFound(USER_NOT_FOUND)
