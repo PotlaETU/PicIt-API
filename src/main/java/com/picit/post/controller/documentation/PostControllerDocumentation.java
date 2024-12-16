@@ -1,5 +1,6 @@
 package com.picit.post.controller.documentation;
 
+import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.post.dto.PostDto;
 import com.picit.post.dto.request.PostRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,14 +20,14 @@ public interface PostControllerDocumentation {
             @ApiResponse(responseCode = "200", description = "Post fetched successfully"),
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
-    Page<PostDto> getPostUser(Authentication authentication, String hobby, int page);
+    List<PostDto> getPostUser(Authentication authentication, String hobby, int page);
 
     @Operation(summary = "Get post", description = "Fetches a post")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Post fetched successfully"),
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
-    Page<PostDto> getPosts(Authentication authentication, String hobby, int page);
+    List<PostDto> getPosts(Authentication authentication, String hobby, int page);
 
 
     @Operation(summary = "Create post", description = "Creates a post")
@@ -41,7 +42,7 @@ public interface PostControllerDocumentation {
             @ApiResponse(responseCode = "204", description = "Post deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
-    ResponseEntity<Void> deletePost(Authentication authentication, String id);
+    ResponseEntity<MessageResponse> deletePost(Authentication authentication, String id);
 
     @Operation(summary = "Update post", description = "Updates a post")
     @ApiResponses(value = {

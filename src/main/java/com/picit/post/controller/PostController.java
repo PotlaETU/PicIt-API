@@ -1,5 +1,6 @@
 package com.picit.post.controller;
 
+import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.post.controller.documentation.PostControllerDocumentation;
 import com.picit.post.dto.PostDto;
 import com.picit.post.dto.request.PostImageRequestDto;
@@ -7,7 +8,6 @@ import com.picit.post.dto.request.PostRequestDto;
 import com.picit.post.services.PostService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +23,12 @@ public class PostController implements PostControllerDocumentation {
     private final PostService postService;
 
     @GetMapping("/user")
-    public Page<PostDto> getPostUser(Authentication authentication, @RequestParam(required = false) String hobby, @RequestParam(defaultValue = "0") int page) {
+    public List<PostDto> getPostUser(Authentication authentication, @RequestParam(required = false) String hobby, @RequestParam(defaultValue = "0") int page) {
         return postService.getPostsByUser(authentication.getName(), hobby, page);
     }
 
     @GetMapping
-    public Page<PostDto> getPosts(Authentication authentication, @RequestParam(required = false) String hobby, @RequestParam(defaultValue = "0") int page) {
+    public List<PostDto> getPosts(Authentication authentication, @RequestParam(required = false) String hobby, @RequestParam(defaultValue = "0") int page) {
         return postService.getPosts(authentication.getName(), hobby, page);
     }
 
@@ -38,7 +38,7 @@ public class PostController implements PostControllerDocumentation {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(Authentication authentication, @PathVariable String id) {
+    public ResponseEntity<MessageResponse> deletePost(Authentication authentication, @PathVariable String id) {
         return postService.deletePost(authentication.getName(), id);
     }
 

@@ -1,5 +1,6 @@
 package com.picit.post.services;
 
+import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.iam.entity.User;
 import com.picit.iam.entity.points.PointDefinition;
 import com.picit.iam.exceptions.PostNotFound;
@@ -57,22 +58,22 @@ public class PostService {
     @Value("${generate-ai-images.uri-get-images}")
     private String urlAiGetImages;
 
-    public Page<PostDto> getPostsByUser(String username, String hobby, int page) {
+    public List<PostDto> getPostsByUser(String username, String hobby, int page) {
         int pageSize = 10;
         var userId = userRepository.findByUsername(username)
                 .map(User::getId)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var query = new Query(PostCriteria.postsByUserId(userId));
-        return getPostDtos(hobby, page, pageSize, query);
+        return getPostDtos(hobby, page, pageSize, query).getContent();
     }
 
-    public Page<PostDto> getPosts(String username, String hobby, int page) {
+    public List<PostDto> getPosts(String username, String hobby, int page) {
         int pageSize = 10;
         var userProfile = userProfileRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
-        return getPostDtos(hobby, page, pageSize, query);
+        return getPostDtos(hobby, page, pageSize, query).getContent();
     }
 
     @NotNull
@@ -141,7 +142,7 @@ public class PostService {
         }
     }
 
-    public ResponseEntity<Void> deletePost(String username, String postId) {
+    public ResponseEntity<MessageResponse> deletePost(String username, String postId) {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         var userId = userRepository.findByUsername(username)
@@ -152,7 +153,10 @@ public class PostService {
             return ResponseEntity.badRequest().build();
         }
         postRepository.delete(post);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(MessageResponse.builder()
+                .message("Post deleted")
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 
     public PostDto updatePost(String username, String postId, PostRequestDto postDto) {

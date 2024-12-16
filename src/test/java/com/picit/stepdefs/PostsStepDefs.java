@@ -21,8 +21,8 @@ public class PostsStepDefs {
 
     private final String baseUrl = "http://localhost:8081/api/v1/post";
     private final TestRestTemplate restTemplate = new TestRestTemplate();
-
     private ResponseEntity<PostDto> responsePostDto;
+    private ResponseEntity<PostDto[]> responsePostsDto;
 
 
     @When("^I create a post")
@@ -48,9 +48,58 @@ public class PostsStepDefs {
             throw new RuntimeException("Response body is null");
         }
         assertNotNull(responsePostDto);
+        testContext.setPostId(responsePostDto.getBody().id());
         assertEquals(HttpStatus.OK, responsePostDto.getStatusCode());
         assertEquals("This is a test post", responsePostDto.getBody().content());
         assertEquals(Hobby.DETENTE, responsePostDto.getBody().hobby());
+    }
+
+    @When("I get the posts by the user")
+    public void iGetThePost() {
+        ResponseEntity<PostDto[]> response = restTemplate.exchange(
+                baseUrl + "/user",
+                HttpMethod.GET,
+                setAuthHeaderWithBody(null),
+                PostDto[].class);
+        assertNotNull(response);
+        responsePostsDto = response;
+    }
+
+    @Then("I should get the posts by the user")
+    public void iShouldGetThePost() {
+        assertNotNull(responsePostsDto);
+        if (responsePostsDto.getBody() == null) {
+            throw new RuntimeException("Response body is null");
+        }
+        assertEquals(HttpStatus.OK, responsePostsDto.getStatusCode());
+        assertEquals("This is a test post", responsePostsDto.getBody()[0].content());
+        assertEquals(Hobby.DETENTE, responsePostsDto.getBody()[0].hobby());
+    }
+
+    @When("I delete a post")
+    public void iDeleteThePost() {
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrl + "/" + testContext.getPostId(),
+                HttpMethod.DELETE,
+                setAuthHeaderWithBody(null),
+                Void.class);
+        assertNotNull(response);
+        responsePostDto = null;
+    }
+
+    @Then("The post should be deleted")
+    public void thePostShouldBeDeleted() {
+        ResponseEntity<PostDto[]> response = restTemplate.exchange(
+                baseUrl + "/user",
+                HttpMethod.GET,
+                setAuthHeaderWithBody(null),
+                PostDto[].class);
+        if (response.getBody() == null) {
+            throw new RuntimeException("Response body is null");
+        }
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody().length);
     }
 
     private <T> HttpEntity<T> setAuthHeaderWithBody(T body) {
@@ -60,7 +109,7 @@ public class PostsStepDefs {
         }
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
-        headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(body, headers);
     }
+
 }
