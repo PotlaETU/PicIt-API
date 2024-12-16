@@ -7,3 +7,7 @@ Feature: IAM feature
   Scenario: Login IAM user
     When I login to the account
     Then The account should be logged in
+
+  Scenario: Logout IAM user
+    When I logout
+    Then The account should be logged out

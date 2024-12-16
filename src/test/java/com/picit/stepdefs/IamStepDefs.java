@@ -3,19 +3,23 @@ package com.picit.stepdefs;
 import com.picit.iam.dto.login.LoginRequest;
 import com.picit.iam.dto.login.LoginResponse;
 import com.picit.iam.dto.login.SignUpRequest;
+import com.picit.utils.TestContext;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class IamStepDefs {
 
-    private final TestRestTemplate restTemplate = new TestRestTemplate();
+    @Autowired
+    private TestContext testContext;
 
+    private final String baseUrl = "http://localhost:8081/api/v1/iam";
+    private final TestRestTemplate restTemplate = new TestRestTemplate();
     private ResponseEntity<LoginResponse> response;
 
     @When("^I create an account")
@@ -27,7 +31,7 @@ public class IamStepDefs {
                 .privacy(true)
                 .notifications(true)
                 .build();
-        response = restTemplate.postForEntity("http://localhost:8081/api/v1/iam/register", signUpRequest, LoginResponse.class);
+        response = restTemplate.postForEntity(baseUrl + "/register", signUpRequest, LoginResponse.class);
         assertNotNull(response);
     }
 
@@ -46,7 +50,7 @@ public class IamStepDefs {
                 .email("test@test.com")
                 .password("testTest")
                 .build();
-        response = restTemplate.postForEntity("http://localhost:8081/api/v1/iam/login", loginRequest, LoginResponse.class);
+        response = restTemplate.postForEntity(baseUrl + "/login", loginRequest, LoginResponse.class);
         assertNotNull(response);
     }
 
@@ -57,5 +61,31 @@ public class IamStepDefs {
         }
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("test", response.getBody().username());
+        testContext.setJwtToken(response.getBody().token().token());
+    }
+
+    @When("I logout")
+    public void iLogout() {
+        String token = testContext.getJwtToken();
+        if (token == null) {
+            throw new IllegalStateException("JWT token not found. Ensure the login step is executed first.");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        HttpEntity<?> request = new HttpEntity<>(headers);
+
+        response = restTemplate.exchange(
+                baseUrl + "/logout",
+                HttpMethod.POST,
+                request,
+                LoginResponse.class);
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Then("The account should be logged out")
+    public void iShouldBeLoggedOut() {
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
