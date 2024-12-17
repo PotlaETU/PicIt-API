@@ -83,7 +83,8 @@ public class IamService {
 
     public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
         User authUser;
-        logger.info("Login request received for username: {}", loginRequest.username());
+        String s = loginRequest.username() == null ? loginRequest.email() : loginRequest.username();
+        logger.info("Login request received for username: {}", s);
         if (loginRequest.username() == null && loginRequest.email() != null) {
             authUser = userRepository.findByEmail(loginRequest.email()).orElseThrow(
                     () -> new UserNotFound(USER_NOT_FOUND)
@@ -108,7 +109,7 @@ public class IamService {
         var loginResponse = setCookiesAndLoginResponse(token, refreshToken, authUser);
 
         if (logger.isInfoEnabled()) {
-            logger.info("Login response generated for username: {}", loginRequest.username());
+            logger.info("Login response generated for username: {}", s);
         }
 
         return ResponseEntity.ok()
