@@ -11,7 +11,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "role", expression = "java(com.picit.iam.entity.UserRole.ROLE_USER)")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
@@ -21,10 +20,12 @@ public interface UserMapper {
     User toUser(SignUpRequest signUpRequest);
 
     @Mapping(target = "points", ignore = true)
+    @Mapping(target = "postCount", ignore = true)
     UserProfileDto toUserProfileDto(UserProfile userProfile);
 
     @Mapping(target = "points", source = "points.pointsNb")
-    UserProfileDto toUserProfileDto(UserProfile userProfile, Points points);
+    UserProfileDto toUserProfileDto(UserProfile userProfile, Points points, Long postCount);
+
 
     @Mapping(target = "id", source = "user.id")
     @Mapping(target = "username", source = "user.username")

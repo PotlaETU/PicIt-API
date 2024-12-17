@@ -10,11 +10,13 @@ import com.picit.iam.dto.token.TokenResponse;
 import com.picit.iam.dto.user.UserDto;
 import com.picit.iam.entity.Settings;
 import com.picit.iam.entity.User;
+import com.picit.iam.entity.points.Points;
 import com.picit.iam.exceptions.ConflictException;
 import com.picit.iam.exceptions.UserNotFound;
 import com.picit.iam.mapper.UserMapper;
 import com.picit.iam.repository.UserProfileRepository;
 import com.picit.iam.repository.UserRepository;
+import com.picit.iam.repository.points.PointsRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -45,6 +47,7 @@ public class IamService {
     private final Logger logger = LoggerFactory.getLogger(IamService.class);
     private final UserProfileRepository userProfileRepository;
     private static final String USER_NOT_FOUND = "User not found";
+    private final PointsRepository pointsRepository;
 
     public ResponseEntity<LoginResponse> signUp(SignUpRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.username()) || userRepository.existsByEmail(signUpRequest.email())) {
@@ -67,6 +70,12 @@ public class IamService {
         var userProfile = userProfileRepository.save(userMapper.toUserProfile(userSaved));
         user.setUserProfile(userProfile);
         userRepository.save(user);
+
+        var pointsUser = Points.builder()
+                .pointsNb(0)
+                .userId(user.getId())
+                .build();
+        pointsRepository.save(pointsUser);
 
         String token = jwtUtil.generateToken(user);
         ResponseCookie jwtCookie = generateCookies(token, refreshToken).getFirst();

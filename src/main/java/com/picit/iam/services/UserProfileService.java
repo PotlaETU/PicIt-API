@@ -15,6 +15,7 @@ import com.picit.iam.repository.UserRepository;
 import com.picit.iam.repository.points.PointsRepository;
 import com.picit.iam.repository.profilepic.ProfilePicRepository;
 import com.picit.post.entity.Hobby;
+import com.picit.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +41,7 @@ public class UserProfileService {
     private final RestTemplate restTemplate = new RestTemplateBuilder().build();
     private final PointsRepository pointsRepository;
     private static final String USER_NOT_FOUND = "User not found";
+    private final PostRepository postRepository;
 
     @Value("${generate-ai-images.uri}")
     private String urlAi;
@@ -243,7 +245,8 @@ public class UserProfileService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var points = pointsRepository.findByUserId(profile.getUserId())
                 .orElseThrow(() -> new UserNotFound("Points for user not found"));
-        return userProfileMapper.toUserProfileDto(profile, points);
+        Long postCount = postRepository.countPostByUserId(profile.getUserId());
+        return userProfileMapper.toUserProfileDto(profile, points, postCount);
     }
 
     private User getUser(String username) {

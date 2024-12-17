@@ -11,6 +11,8 @@ public record UserProfileDto(
         String bio,
         List<Hobby> hobbies,
         List<String> follows,
+        List<String> followers,
+        Long postCount,
         int points
 ) {
 }
