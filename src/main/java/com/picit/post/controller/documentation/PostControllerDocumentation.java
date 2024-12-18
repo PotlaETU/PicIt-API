@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ public interface PostControllerDocumentation {
             @ApiResponse(responseCode = "201", description = "Post created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    PostDto createPost(Authentication authentication, PostRequestDto postDto);
+    PostDto createPost(Authentication authentication, PostRequestDto postDto, MultipartFile file);
 
     @Operation(summary = "Delete post", description = "Deletes a post")
     @ApiResponses(value = {

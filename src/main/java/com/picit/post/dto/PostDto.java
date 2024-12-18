@@ -19,6 +19,7 @@ public record PostDto(
         Boolean isPublic,
         List<Likes> likes,
         List<Comment> comments,
+        List<String> images,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

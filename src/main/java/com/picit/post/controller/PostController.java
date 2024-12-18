@@ -8,6 +8,7 @@ import com.picit.post.dto.request.PostRequestDto;
 import com.picit.post.services.PostService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +33,17 @@ public class PostController implements PostControllerDocumentation {
         return postService.getPosts(authentication.getName(), hobby, page);
     }
 
-    @PostMapping
-    public PostDto createPost(Authentication authentication, @Valid @RequestBody PostRequestDto postDto) {
-        return postService.createPost(authentication.getName(), postDto);
+    @GetMapping("/{id}")
+    public ResponseEntity<byte[]> getPostImage(Authentication authentication, @PathVariable String id) {
+        return postService.getPostImage(authentication.getName(), id);
+    }
+
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public PostDto createPost(
+            Authentication authentication,
+            @Valid @RequestPart("postData") PostRequestDto postDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+        return postService.createPost(authentication.getName(), postDto, file);
     }
 
     @DeleteMapping("/{id}")
