@@ -151,19 +151,25 @@ public class IamService {
         return ResponseEntity.ok(loginResponse);
     }
 
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<MessageResponse> logout(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
         String token;
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            token = getTokenFromCookie("jwt", request);
-        } else {
-            token = authorizationHeader.substring(7);
-        }
-        if (token == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        String username = jwtUtil.extractUsername(token);
 
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7);
+        } else {
+            token = getTokenFromCookie("jwt", request);
+        }
+
+        if (token == null || token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(MessageResponse.builder()
+                            .message("Token is missing or invalid")
+                            .timestamp(LocalDateTime.now())
+                            .build());
+        }
+
+        String username = jwtUtil.extractUsername(token);
         User authUser = userRepository.findByUsername(username).orElseThrow(
                 () -> new UserNotFound(USER_NOT_FOUND)
         );
@@ -174,9 +180,12 @@ public class IamService {
         ResponseCookie refreshTokenCookie = jwtUtil.getCleanRefreshTokenCookie();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString(), refreshTokenCookie.toString())
-                .build();
-
+                .body(MessageResponse.builder()
+                        .message("Logout successful")
+                        .timestamp(LocalDateTime.now())
+                        .build());
     }
+
 
     public UserDto getUser(String username) {
         var user = userRepository.findByUsername(username).orElseThrow(

@@ -48,7 +48,7 @@ public class IamController implements IamControllerDocumentation {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<MessageResponse> logout(HttpServletRequest request) {
         return iamService.logout(request);
     }
 
