@@ -92,7 +92,7 @@ public class PostService {
                 .toList(), pageable, () -> total);
     }
 
-    public PostDto createPost(String username, PostRequestDto postDto) {
+    public PostDto createPost(String username, PostRequestDto postDto, MultipartFile file) {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var post = postMapper.postRequestDtoToPost(postDto, user.getId());
@@ -102,8 +102,26 @@ public class PostService {
             points.setPointsNb(points.getPointsNb() + PointDefinition.CREATE_POST.getPoints());
             pointsRepository.save(points);
         }
+        setPostImage(post, file, user);
         postRepository.save(post);
         return postMapper.postToPostDto(post);
+    }
+
+    public void setPostImage(Post post, MultipartFile file, User user) {
+        if (file != null && !file.isEmpty()) {
+            try {
+                var postImage = PostImage.builder()
+                        .postId(post.getId())
+                        .userId(user.getId())
+                        .aiGenerated(false)
+                        .imageBinary(new Binary(file.getBytes()))
+                        .build();
+                postImageRepository.save(postImage);
+                post.setPostImage(postImage);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to save post image", e);
+            }
+        }
     }
 
     public ResponseEntity<String> setPostImage(MultipartFile file, String username, String postId, Boolean aiGenerated, PostImageRequestDto postImageRequestDto) {
@@ -217,5 +235,21 @@ public class PostService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .build();
         }
+    }
+
+    public ResponseEntity<byte[]> getPostImage(String name, String id) {
+        var post = postRepository.findById(id)
+                .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
+        var userProfile = userProfileRepository.findByUsername(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
+        if (!mongoTemplate.find(query, Post.class).contains(post)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .build();
+        }
+        if (post.getPostImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(post.getPostImage().getImageBinary().getData());
     }
 }

@@ -24,7 +24,7 @@ public class Post {
     private Boolean isPublic;
     private String userId;
     private List<Comment> comments;
+    private List<String> images;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 }
