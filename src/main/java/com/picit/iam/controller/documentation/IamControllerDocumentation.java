@@ -60,7 +60,7 @@ public interface IamControllerDocumentation {
             @ApiResponse(responseCode = "200", description = "User logged out successfully"),
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
-    ResponseEntity<Void> logout(HttpServletRequest request);
+    ResponseEntity<MessageResponse> logout(HttpServletRequest request);
 
     @Operation(summary = "Reset the user's password", description = "Resets the user's password")
     @ApiResponses(value = {

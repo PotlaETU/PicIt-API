@@ -1,5 +1,6 @@
 package com.picit.post.services;
 
+import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.iam.entity.User;
 import com.picit.iam.entity.points.PointDefinition;
 import com.picit.iam.exceptions.PostNotFound;
@@ -57,22 +58,22 @@ public class PostService {
     @Value("${generate-ai-images.uri-get-images}")
     private String urlAiGetImages;
 
-    public Page<PostDto> getPostsByUser(String username, String hobby, int page) {
+    public List<PostDto> getPostsByUser(String username, String hobby, int page) {
         int pageSize = 10;
         var userId = userRepository.findByUsername(username)
                 .map(User::getId)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var query = new Query(PostCriteria.postsByUserId(userId));
-        return getPostDtos(hobby, page, pageSize, query);
+        return getPostDtos(hobby, page, pageSize, query).getContent();
     }
 
-    public Page<PostDto> getPosts(String username, String hobby, int page) {
+    public List<PostDto> getPosts(String username, String hobby, int page) {
         int pageSize = 10;
         var userProfile = userProfileRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
-        return getPostDtos(hobby, page, pageSize, query);
+        return getPostDtos(hobby, page, pageSize, query).getContent();
     }
 
     @NotNull
@@ -85,13 +86,25 @@ public class PostService {
 
         query.with(pageable);
         List<Post> posts = mongoTemplate.find(query, Post.class);
-
+        posts = posts.stream()
+                .peek(post -> {
+                    post.setUsernameCreator(userRepository.findById(post.getUserId())
+                            .map(User::getUsername)
+                            .orElse(""));
+                })
+                .toList();
         return PageableExecutionUtils.getPage(posts.stream()
                 .map(postMapper::postToPostDto)
                 .toList(), pageable, () -> total);
     }
 
-    public PostDto createPost(String username, PostRequestDto postDto) {
+    public PostDto createPost(String username, PostRequestDto postDto, PostRequestDto postDto2, MultipartFile file) {
+        if (postDto == null && postDto2 == null) {
+            throw new IllegalArgumentException("Post data is missing");
+        }
+        if (postDto == null) {
+            postDto = postDto2;
+        }
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var post = postMapper.postRequestDtoToPost(postDto, user.getId());
@@ -101,8 +114,26 @@ public class PostService {
             points.setPointsNb(points.getPointsNb() + PointDefinition.CREATE_POST.getPoints());
             pointsRepository.save(points);
         }
+        setPostImage(post, file, user);
         postRepository.save(post);
         return postMapper.postToPostDto(post);
+    }
+
+    public void setPostImage(Post post, MultipartFile file, User user) {
+        if (file != null && !file.isEmpty()) {
+            try {
+                var postImage = PostImage.builder()
+                        .postId(post.getId())
+                        .userId(user.getId())
+                        .aiGenerated(false)
+                        .imageBinary(new Binary(file.getBytes()))
+                        .build();
+                postImageRepository.save(postImage);
+                post.setPostImage(postImage);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to save post image", e);
+            }
+        }
     }
 
     public ResponseEntity<String> setPostImage(MultipartFile file, String username, String postId, Boolean aiGenerated, PostImageRequestDto postImageRequestDto) {
@@ -141,7 +172,7 @@ public class PostService {
         }
     }
 
-    public ResponseEntity<Void> deletePost(String username, String postId) {
+    public ResponseEntity<MessageResponse> deletePost(String username, String postId) {
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         var userId = userRepository.findByUsername(username)
@@ -152,7 +183,10 @@ public class PostService {
             return ResponseEntity.badRequest().build();
         }
         postRepository.delete(post);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(MessageResponse.builder()
+                .message("Post deleted")
+                .timestamp(LocalDateTime.now())
+                .build());
     }
 
     public PostDto updatePost(String username, String postId, PostRequestDto postDto) {
@@ -213,5 +247,24 @@ public class PostService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .build();
         }
+    }
+
+    public ResponseEntity<byte[]> getPostImage(String name, String id) {
+        var post = postRepository.findById(id)
+                .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
+        var userProfile = userProfileRepository.findByUsername(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var query = new Query(PostCriteria.postImageVisibility(userProfile.getFollows(), post.getUserId()));
+
+        boolean hasAccess = mongoTemplate.exists(query, Post.class);
+
+        if (!hasAccess) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (post.getPostImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(post.getPostImage().getImageBinary().getData());
     }
 }

@@ -14,11 +14,13 @@ import java.util.List;
 public record PostDto(
         String id,
         String userId,
+        String usernameCreator,
         String content,
         Hobby hobby,
         Boolean isPublic,
         List<Likes> likes,
         List<Comment> comments,
+        List<String> images,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

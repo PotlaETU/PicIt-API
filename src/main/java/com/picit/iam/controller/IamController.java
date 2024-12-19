@@ -18,8 +18,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/iam")
 @AllArgsConstructor
+@CrossOrigin(maxAge = 3600, origins = "*")
+@RequestMapping("/api/v1/iam")
 public class IamController implements IamControllerDocumentation {
 
     private final IamService iamService;
@@ -47,7 +48,7 @@ public class IamController implements IamControllerDocumentation {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) {
+    public ResponseEntity<MessageResponse> logout(HttpServletRequest request) {
         return iamService.logout(request);
     }
 
@@ -57,4 +58,10 @@ public class IamController implements IamControllerDocumentation {
                                                          Authentication authentication) {
         return iamService.resetPassword(oldPassword, newPassword, authentication.getName());
     }
+
+    @PostMapping("/validate")
+    public ResponseEntity<MessageResponse> validate(@RequestParam(name = "token") String token) {
+        return iamService.validate(token);
+    }
 }
+

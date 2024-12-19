@@ -38,14 +38,14 @@ public class User implements UserDetails {
 
     private LocalDateTime updatedAt;
 
-    private String role;
+    private UserRole role;
 
     private transient UserProfile userProfile;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
-        authorities.add(new SimpleGrantedAuthority(this.role));
+        authorities.add(new SimpleGrantedAuthority(this.role.name()));
         return new ArrayList<>(authorities);
     }
 

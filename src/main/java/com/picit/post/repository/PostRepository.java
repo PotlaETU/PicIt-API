@@ -13,4 +13,6 @@ public interface PostRepository extends MongoRepository<Post, String> {
     Optional<List<Post>> findPostsByContentRegex(String content);
 
     Boolean existsPostByUserIdAndCreatedAtAfter(String userId, LocalDateTime startOfDay);
+
+    Long countPostByUserId(String userId);
 }

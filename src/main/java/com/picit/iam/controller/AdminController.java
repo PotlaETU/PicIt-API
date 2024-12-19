@@ -19,7 +19,7 @@ public class AdminController implements AdminControllerDocumentation {
     private final ExportAndImportService exportAndImportService;
 
     @GetMapping("/backup")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> backupDataCsv(@RequestParam("collection") String collectionName) {
         return exportAndImportService.backupDataCsv(collectionName);
     }
