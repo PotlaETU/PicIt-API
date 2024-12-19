@@ -98,7 +98,13 @@ public class PostService {
                 .toList(), pageable, () -> total);
     }
 
-    public PostDto createPost(String username, PostRequestDto postDto, MultipartFile file) {
+    public PostDto createPost(String username, PostRequestDto postDto, PostRequestDto postDto2, MultipartFile file) {
+        if (postDto == null && postDto2 == null) {
+            throw new IllegalArgumentException("Post data is missing");
+        }
+        if (postDto == null) {
+            postDto = postDto2;
+        }
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var post = postMapper.postRequestDtoToPost(postDto, user.getId());
