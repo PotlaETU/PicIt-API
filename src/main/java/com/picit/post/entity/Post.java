@@ -23,6 +23,7 @@ public class Post {
     private List<Likes> likes;
     private Boolean isPublic;
     private String userId;
+    private String usernameCreator;
     private List<Comment> comments;
     private List<String> images;
     private LocalDateTime createdAt;

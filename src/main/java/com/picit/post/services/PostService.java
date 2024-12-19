@@ -86,7 +86,13 @@ public class PostService {
 
         query.with(pageable);
         List<Post> posts = mongoTemplate.find(query, Post.class);
-
+        posts = posts.stream()
+                .peek(post -> {
+                    post.setUsernameCreator(userRepository.findById(post.getUserId())
+                            .map(User::getUsername)
+                            .orElse(""));
+                })
+                .toList();
         return PageableExecutionUtils.getPage(posts.stream()
                 .map(postMapper::postToPostDto)
                 .toList(), pageable, () -> total);
