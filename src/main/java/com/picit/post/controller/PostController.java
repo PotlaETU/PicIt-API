@@ -41,10 +41,16 @@ public class PostController implements PostControllerDocumentation {
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public PostDto createPost(
             Authentication authentication,
-            @Valid @RequestPart(value = "postData", required = false) PostRequestDto postDto,
-            @Valid @RequestBody(required = false) PostRequestDto postDto2,
+            @Valid @RequestPart(value = "postData") PostRequestDto postDto,
             @RequestPart(value = "file", required = false) MultipartFile file) {
-        return postService.createPost(authentication.getName(), postDto, postDto2, file);
+        return postService.createPost(authentication.getName(), postDto, null, file);
+    }
+
+    @PostMapping(path = "/json", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public PostDto createPostJson(
+            Authentication authentication,
+            @Valid @RequestBody PostRequestDto postDto) {
+        return postService.createPost(authentication.getName(), null, postDto, null);
     }
 
     @DeleteMapping("/{id}")

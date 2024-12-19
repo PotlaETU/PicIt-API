@@ -35,7 +35,7 @@ public interface PostControllerDocumentation {
             @ApiResponse(responseCode = "201", description = "Post created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    PostDto createPost(Authentication authentication, PostRequestDto postDto, PostRequestDto postDto2, MultipartFile file);
+    PostDto createPost(Authentication authentication, PostRequestDto postDto, MultipartFile file);
 
     @Operation(summary = "Delete post", description = "Deletes a post")
     @ApiResponses(value = {
