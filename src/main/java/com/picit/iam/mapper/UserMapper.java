@@ -39,6 +39,6 @@ public interface UserMapper {
     @Mapping(target = "hobbies", ignore = true)
     @Mapping(target = "follows", expression = "java(new java.util.ArrayList<>())")
     @Mapping(target = "followers", expression = "java(new java.util.ArrayList<>())")
-    @Mapping(target = "blockedUsers", ignore = true)
+    @Mapping(target = "blockedUsers", expression = "java(new java.util.ArrayList<>())")
     UserProfile toUserProfile(User user);
 }

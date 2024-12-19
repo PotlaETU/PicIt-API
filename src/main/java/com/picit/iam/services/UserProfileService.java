@@ -89,6 +89,7 @@ public class UserProfileService {
         userProfile.setHobbies(userProfileDto.hobbies());
         userProfile.setFollows(userProfileDto.follows() == null ? new ArrayList<>() : userProfileDto.follows());
         userProfile.setFollowers(userProfileDto.followers() == null ? new ArrayList<>() : userProfileDto.followers());
+        userProfile.setBlockedUsers(new ArrayList<>());
 
         Points points = Points.builder()
                 .userId(userProfile.getUserId())
@@ -116,6 +117,32 @@ public class UserProfileService {
         Image profilePic = userProfile.getProfilePicture();
         if (profilePic != null) {
             byte[] profilePicData = userProfile
+                    .getProfilePicture()
+                    .getImageBinary()
+                    .getData();
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(profilePicData);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    public ResponseEntity<byte[]> getProfilePictureUser(String username, String userId) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        User userToGet = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var userProfile = userProfileRepository.findByUserId(user.getId());
+        var userProfileToGet = userProfileRepository.findByUserId(userToGet.getId());
+
+        if (userProfileToGet.getBlockedUsers().contains(user.getId())) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Image profilePic = userProfile.getProfilePicture();
+        if (profilePic != null) {
+            byte[] profilePicData = userProfileToGet
                     .getProfilePicture()
                     .getImageBinary()
                     .getData();
@@ -275,4 +302,29 @@ public class UserProfileService {
         return ResponseEntity.ok().build();
     }
 
+    public UserProfileDto getProfileUserId(String username, String userId) {
+        var profile = userProfileRepository.findByUserId(userId);
+        var userToGet = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+
+        if (profile == null || profile.getBlockedUsers().contains(user.getId())) {
+            throw new UserNotFound(USER_NOT_FOUND);
+        }
+        if (profile.getUserId().equals(user.getId())) {
+            return getProfile(username);
+        }
+        if (!profile.getFollowers().contains(user.getId()) && "private".equals(userToGet.getSettings().getPrivacy())) {
+            return UserProfileDto.builder()
+                    .bio(profile.getBio())
+                    .username(profile.getUsername())
+                    .build();
+        }
+
+        var points = pointsRepository.findByUserId(profile.getUserId())
+                .orElseThrow(() -> new UserNotFound("Points for user not found"));
+        Long postCount = postRepository.countPostByUserId(profile.getUserId());
+        return userProfileMapper.toUserProfileDto(profile, points, postCount);
+    }
 }
