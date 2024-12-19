@@ -242,11 +242,14 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         var userProfile = userProfileRepository.findByUsername(name)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
-        if (!mongoTemplate.find(query, Post.class).contains(post)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .build();
+        var query = new Query(PostCriteria.postImageVisibility(userProfile.getFollows(), post.getUserId()));
+
+        boolean hasAccess = mongoTemplate.exists(query, Post.class);
+
+        if (!hasAccess) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         if (post.getPostImage() == null) {
             return ResponseEntity.notFound().build();
         }

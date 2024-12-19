@@ -87,7 +87,8 @@ public class UserProfileService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         userProfile.setBio(userProfileDto.bio());
         userProfile.setHobbies(userProfileDto.hobbies());
-        userProfile.setFollows(userProfileDto.follows());
+        userProfile.setFollows(userProfileDto.follows() == null ? new ArrayList<>() : userProfileDto.follows());
+        userProfile.setFollowers(userProfileDto.followers() == null ? new ArrayList<>() : userProfileDto.followers());
 
         Points points = Points.builder()
                 .userId(userProfile.getUserId())
