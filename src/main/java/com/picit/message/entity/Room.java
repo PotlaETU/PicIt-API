@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ public class Room {
     @Id
     private String id;
 
-    private List<String> users;
+    private Set<String> users;
 
     private List<Message> messages;
 }
