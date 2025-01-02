@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public record MessageResponseDto(
         String username,
         String content,
+        String roomId,
         LocalDateTime createdAt
 ) {
 }
