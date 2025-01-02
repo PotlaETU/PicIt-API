@@ -38,7 +38,6 @@ public class MessageService {
         var userSender = userRepository.findByUsername(chatMessage.senderUsername())
                 .orElseThrow(() -> new UserNotFound("User not found"));
 
-        //TODO: encrypt message
         Message message = Message.builder()
                 .senderId(userSender.getId())
                 .roomId(conversationId)
@@ -94,6 +93,17 @@ public class MessageService {
                                 .filter(u -> !u.equals(username))
                                 .toList())
                         .type(room.getType())
+                        .lastMessage(room.getMessages()
+                                .stream()
+                                .map(m -> MessageDto.builder()
+                                        .content(m.getContent())
+                                        .senderUsername(userRepository.findById(m.getSenderId())
+                                                .orElseThrow(() -> new UserNotFound("User not found"))
+                                                .getUsername())
+                                        .createdAt(m.getTimestamp())
+                                        .build())
+                                .reduce((first, second) -> second)
+                                .orElse(null))
                         .build())
                 .toList();
         return ResponseEntity.ok(rooms);
@@ -110,7 +120,9 @@ public class MessageService {
                 .messages(List.of())
                 .users(Set.of(user, userToChatWith))
                 .build();
-        if (roomRepository.findById(room.getId()).isPresent()) {
+        var roomRepositoryById = roomRepository.findById(room.getId());
+        if (roomRepositoryById.isPresent()) {
+            room = roomRepositoryById.get();
             return ResponseEntity.ok(
                     RoomDto.builder()
                             .id(room.getId())
@@ -119,6 +131,17 @@ public class MessageService {
                                     .map(User::getUsername)
                                     .filter(u -> !u.equals(username))
                                     .toList())
+                            .lastMessage(room.getMessages()
+                                    .stream()
+                                    .map(m -> MessageDto.builder()
+                                            .content(m.getContent())
+                                            .senderUsername(userRepository.findById(m.getSenderId())
+                                                    .orElseThrow(() -> new UserNotFound("User not found"))
+                                                    .getUsername())
+                                            .createdAt(m.getTimestamp())
+                                            .build())
+                                    .reduce((first, second) -> second)
+                                    .orElse(null))
                             .build()
             );
         }
