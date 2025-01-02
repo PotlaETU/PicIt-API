@@ -46,7 +46,7 @@ public interface IamControllerDocumentation {
     })
     ResponseEntity<TokenResponse> refresh(@RequestBody(
             description = "The token refresh request",
-            required = true) TokenRefreshRequest tokenRefreshRequest, Authentication authentication, HttpServletRequest request);
+            required = true) TokenRefreshRequest tokenRefreshRequest, HttpServletRequest request);
 
     @Operation(summary = "Get the current user", description = "Returns the details of the currently authenticated user")
     @ApiResponses(value = {

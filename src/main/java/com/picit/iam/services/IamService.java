@@ -17,6 +17,7 @@ import com.picit.iam.mapper.UserMapper;
 import com.picit.iam.repository.UserProfileRepository;
 import com.picit.iam.repository.UserRepository;
 import com.picit.iam.repository.points.PointsRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -126,29 +127,39 @@ public class IamService {
                 .body(loginResponse);
     }
 
-    public ResponseEntity<TokenResponse> refresh(TokenRefreshRequest tokenRefreshRequest, String username, HttpServletRequest http) {
-        String refreshToken = tokenRefreshRequest != null ? tokenRefreshRequest.refreshToken() : null;
-        if (refreshToken == null) {
-            refreshToken = getTokenFromCookie("refreshToken", http);
+    public ResponseEntity<TokenResponse> refresh(TokenRefreshRequest tokenRefreshRequest, HttpServletRequest http) {
+        try {
+            String refreshToken = tokenRefreshRequest != null ? tokenRefreshRequest.refreshToken() : null;
+            if (refreshToken == null) {
+                refreshToken = getTokenFromCookie("refreshToken", http);
+            }
+
+            if (refreshToken == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(null);
+            }
+
+            if (jwtUtil.isTokenExpired(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(null);
+            }
+
+            String usernameToken = jwtUtil.extractUsername(refreshToken);
+            User user = userRepository.findByUsername(usernameToken)
+                    .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+
+            String newAccessToken = jwtUtil.generateToken(user);
+            String newRefreshToken = jwtUtil.generateRefreshToken(user);
+            userRepository.save(user);
+            var loginResponse = TokenResponse.builder()
+                    .token(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
+            return ResponseEntity.ok(loginResponse);
+        } catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(null);
         }
-        String usernameToken = jwtUtil.extractUsername(refreshToken);
-
-        User user = userRepository.findByUsername(usernameToken).orElseThrow(
-                () -> new UserNotFound(USER_NOT_FOUND)
-        );
-        if (jwtUtil.isTokenExpired(refreshToken) || !username.equals(usernameToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-
-        String newAccessToken = jwtUtil.generateToken(user);
-        String newRefreshToken = jwtUtil.generateRefreshToken(user);
-        userRepository.save(user);
-
-        var loginResponse = TokenResponse.builder()
-                .token(newAccessToken)
-                .refreshToken(newRefreshToken)
-                .build();
-        return ResponseEntity.ok(loginResponse);
     }
 
     public ResponseEntity<MessageResponse> logout(HttpServletRequest request) {
