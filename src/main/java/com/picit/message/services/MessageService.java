@@ -5,12 +5,15 @@ import com.picit.iam.exceptions.UserNotFound;
 import com.picit.iam.repository.UserRepository;
 import com.picit.message.dto.MessageDto;
 import com.picit.message.dto.MessageResponseDto;
+import com.picit.message.dto.RoomDto;
+import com.picit.message.dto.RoomRequestDto;
 import com.picit.message.entity.Message;
 import com.picit.message.entity.Room;
 import com.picit.message.repository.MessageRepository;
 import com.picit.message.repository.RoomRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -32,7 +35,7 @@ public class MessageService {
         if (chatMessage == null) {
             throw new IllegalArgumentException("Chat message cannot be null");
         }
-          var userSender = userRepository.findByUsername(chatMessage.senderUsername())
+        var userSender = userRepository.findByUsername(chatMessage.senderUsername())
                 .orElseThrow(() -> new UserNotFound("User not found"));
 
         //TODO: encrypt message
@@ -64,14 +67,71 @@ public class MessageService {
             roomRepository.save(Room.builder()
                     .id(conversationId)
                     .messages(List.of(message))
-                    .users(Set.of(userSender.getId()))
+                    .users(Set.of(userSender))
                     .build());
         } else {
             var room = roomRepository.findById(conversationId)
                     .orElseThrow(() -> new IllegalArgumentException("Room not found"));
             room.getMessages().add(message);
-            room.getUsers().add(userSender.getId());
+            room.getUsers().add(userSender);
             roomRepository.save(room);
         }
+    }
+
+    public ResponseEntity<List<RoomDto>> getRoomsForUser(String username) {
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+
+        var rooms = roomRepository.findAll()
+                .stream()
+                .filter(room -> room.getUsers()
+                        .stream()
+                        .anyMatch(u -> u.getId().equals(user.getId())))
+                .map(room -> RoomDto.builder()
+                        .id(room.getId())
+                        .users(room.getUsers().stream()
+                                .map(User::getUsername)
+                                .filter(u -> !u.equals(username))
+                                .toList())
+                        .type(room.getType())
+                        .build())
+                .toList();
+        return ResponseEntity.ok(rooms);
+    }
+
+    public ResponseEntity<RoomDto> createRoom(String username, RoomRequestDto roomRequestDto) {
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+
+        var userToChatWith = userRepository.findByUsername(roomRequestDto.username())
+                .orElseThrow(() -> new UserNotFound("User not found"));
+
+        var room = Room.builder()
+                .messages(List.of())
+                .users(Set.of(user, userToChatWith))
+                .build();
+        if (roomRepository.findById(room.getId()).isPresent()) {
+            return ResponseEntity.ok(
+                    RoomDto.builder()
+                            .id(room.getId())
+                            .type(room.getType())
+                            .users(room.getUsers().stream()
+                                    .map(User::getUsername)
+                                    .filter(u -> !u.equals(username))
+                                    .toList())
+                            .build()
+            );
+        }
+        roomRepository.save(room);
+        return ResponseEntity.ok(
+                RoomDto.builder()
+                        .id(room.getId())
+                        .type(roomRequestDto.type())
+                        .users(room.getUsers().stream()
+                                .map(User::getUsername)
+                                .filter(u -> !u.equals(username))
+                                .toList())
+                        .build()
+        );
     }
 }
