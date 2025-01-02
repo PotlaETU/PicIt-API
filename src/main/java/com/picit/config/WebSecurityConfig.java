@@ -42,6 +42,8 @@ public class WebSecurityConfig {
                             request.requestMatchers(HttpMethod.GET, "/actuator/health").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll();
+                            request.requestMatchers(HttpMethod.GET, "/api/v1/iam/refresh").permitAll();
+                            request.requestMatchers(HttpMethod.GET, "/api/v1/iam/validate").permitAll();
                             request.anyRequest().authenticated();
                         }
                 ).csrf(AbstractHttpConfigurer::disable)
