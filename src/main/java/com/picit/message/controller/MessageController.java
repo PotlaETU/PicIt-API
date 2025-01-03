@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -46,6 +47,11 @@ public class MessageController implements MessageControllerDocumentation {
     @PostMapping("/api/v1/messages/rooms")
     public ResponseEntity<RoomDto> createRoom(Authentication authentication, @RequestBody RoomRequestDto roomRequestDto) {
         return messageService.createRoom(authentication.getName(), roomRequestDto);
+    }
+
+    @GetMapping("/api/v1/messages/rooms/{roomId}")
+    public ResponseEntity<List<MessageResponseDto>> getMessagesForRoom(@PathVariable String roomId) {
+        return messageService.getMessagesForRoom(roomId);
     }
 
 }

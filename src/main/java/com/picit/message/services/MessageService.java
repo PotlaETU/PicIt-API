@@ -159,4 +159,25 @@ public class MessageService {
                         .build()
         );
     }
+
+    public ResponseEntity<List<MessageResponseDto>> getMessagesForRoom(String roomId) {
+        var messages = messageRepository.findAllByRoomId(roomId)
+                .stream()
+                .filter(
+                        m -> roomRepository.findById(roomId)
+                                .orElseThrow(() -> new IllegalArgumentException("Room not found"))
+                                .getUsers()
+                                .stream()
+                                .anyMatch(u -> u.getId().equals(m.getSenderId())))
+                .map(m -> MessageResponseDto.builder()
+                        .content(m.getContent())
+                        .username(userRepository.findById(m.getSenderId())
+                                .orElseThrow(() -> new UserNotFound("User not found"))
+                                .getUsername())
+                        .createdAt(m.getTimestamp())
+                        .roomId(roomId)
+                        .build())
+                .toList();
+        return ResponseEntity.ok(messages);
+    }
 }
