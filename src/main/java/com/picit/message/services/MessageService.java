@@ -51,11 +51,13 @@ public class MessageService {
             log.error("HeaderAccessor is null");
         } else {
             sessionAttributes.put("username", chatMessage.senderUsername());
-            brokerMessagingTemplate.convertAndSend("/topic/" + conversationId, chatMessage);
+            brokerMessagingTemplate.convertAndSend("/topic/messages" + conversationId, chatMessage);
+            log.info("message sent to room {}", conversationId);
         }
 
         return MessageResponseDto.builder()
                 .content(chatMessage.content())
+                .roomId(conversationId)
                 .username(userSender.getUsername())
                 .createdAt(chatMessage.createdAt())
                 .build();
