@@ -42,8 +42,8 @@ public class WebSecurityConfig {
                             request.requestMatchers(HttpMethod.GET, "/actuator/health").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/swagger-ui/**").permitAll();
                             request.requestMatchers(HttpMethod.GET, "/v3/api-docs/**").permitAll();
-                            request.requestMatchers(HttpMethod.GET, "/api/v1/iam/refresh").permitAll();
-                            request.requestMatchers(HttpMethod.GET, "/api/v1/iam/validate").permitAll();
+                            request.requestMatchers(HttpMethod.POST, "/api/v1/iam/refresh").permitAll();
+                            request.requestMatchers(HttpMethod.POST, "/api/v1/iam/validate").permitAll();
                             request.anyRequest().authenticated();
                         }
                 ).csrf(AbstractHttpConfigurer::disable)
@@ -79,7 +79,7 @@ public class WebSecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.addAllowedOrigin("http://localhost:3000");
+        corsConfiguration.addAllowedOriginPattern("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.addAllowedMethod("*");
 
