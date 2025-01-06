@@ -302,9 +302,10 @@ public class UserProfileService {
         return ResponseEntity.ok().build();
     }
 
-    public UserProfileDto getProfileUserId(String username, String userId) {
-        var profile = userProfileRepository.findByUserId(userId);
-        var userToGet = userRepository.findById(userId)
+    public UserProfileDto getProfileUsername(String username, String usernameToGet) {
+        var profile = userProfileRepository.findByUsername(usernameToGet)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var userToGet = userRepository.findByUsername(usernameToGet)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
