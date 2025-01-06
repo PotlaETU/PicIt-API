@@ -8,9 +8,9 @@ Feature: Posts feature
     When I get the posts by the user
     Then I should get the posts by the user
 
-#  Scenario: Update a post
-#    When I update a post
-#    Then The post should be updated
+  Scenario: Update a post
+    When I update a post
+    Then The post should be updated
 
   Scenario: Delete a post
     When I delete a post
