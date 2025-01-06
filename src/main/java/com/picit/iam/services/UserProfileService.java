@@ -41,6 +41,7 @@ public class UserProfileService {
     private final RestTemplate restTemplate = new RestTemplateBuilder().build();
     private final PointsRepository pointsRepository;
     private static final String USER_NOT_FOUND = "User not found";
+    private static final String USER_NOT_FOUND_POINTS = "Points for user not found";
     private final PostRepository postRepository;
 
     @Value("${generate-ai-images.uri}")
@@ -270,7 +271,7 @@ public class UserProfileService {
     public UserProfileDto getPoints(String name) {
         var userId = getUser(name).getId();
         var points = pointsRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFound("Points for user not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
         return UserProfileDto.builder()
                 .points(points.getPointsNb())
                 .build();
@@ -280,7 +281,7 @@ public class UserProfileService {
         var profile = getUserProfile(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var points = pointsRepository.findByUserId(profile.getUserId())
-                .orElseThrow(() -> new UserNotFound("Points for user not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
         Long postCount = postRepository.countPostByUserId(profile.getUserId());
         return userProfileMapper.toUserProfileDto(profile, points, postCount);
     }
@@ -332,7 +333,7 @@ public class UserProfileService {
         }
 
         var points = pointsRepository.findByUserId(profile.getUserId())
-                .orElseThrow(() -> new UserNotFound("Points for user not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
         Long postCount = postRepository.countPostByUserId(profile.getUserId());
         return userProfileMapper.toUserProfileDto(profile, points, postCount);
     }

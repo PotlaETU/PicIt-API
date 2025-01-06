@@ -3,6 +3,7 @@ package com.picit.post.services;
 import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.iam.entity.User;
 import com.picit.iam.entity.points.PointDefinition;
+import com.picit.iam.exceptions.ImageCreationError;
 import com.picit.iam.exceptions.PostNotFound;
 import com.picit.iam.exceptions.UserNotFound;
 import com.picit.iam.repository.UserProfileRepository;
@@ -86,13 +87,11 @@ public class PostService {
 
         query.with(pageable);
         List<Post> posts = mongoTemplate.find(query, Post.class);
-        posts = posts.stream()
-                .peek(post -> {
-                    post.setUsernameCreator(userRepository.findById(post.getUserId())
-                            .map(User::getUsername)
-                            .orElse(""));
-                })
-                .toList();
+        for (Post post : posts) {
+            post.setUsernameCreator(userRepository.findById(post.getUserId())
+                    .map(User::getUsername)
+                    .orElse(""));
+        }
         return PageableExecutionUtils.getPage(posts.stream()
                 .map(postMapper::postToPostDto)
                 .toList(), pageable, () -> total);
@@ -131,7 +130,7 @@ public class PostService {
                 postImageRepository.save(postImage);
                 post.setPostImage(postImage);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to save post image", e);
+                throw new ImageCreationError("Failed to save post image", e);
             }
         }
     }

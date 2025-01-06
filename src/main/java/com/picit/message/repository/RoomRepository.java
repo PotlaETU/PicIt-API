@@ -4,7 +4,6 @@ import com.picit.iam.entity.User;
 import com.picit.message.entity.Room;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 

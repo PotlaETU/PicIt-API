@@ -30,13 +30,15 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final SimpMessagingTemplate brokerMessagingTemplate;
     private final UserRepository userRepository;
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String ROOM_NOT_FOUND = "Room not found";
 
     public MessageResponseDto sendMessageToConvId(MessageDto chatMessage, String conversationId, SimpMessageHeaderAccessor headerAccessor) {
         if (chatMessage == null) {
             throw new IllegalArgumentException("Chat message cannot be null");
         }
         var userSender = userRepository.findByUsername(chatMessage.senderUsername())
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         Message message = Message.builder()
                 .senderId(userSender.getId())
@@ -74,7 +76,7 @@ public class MessageService {
                     .build());
         } else {
             var room = roomRepository.findById(conversationId)
-                    .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+                    .orElseThrow(() -> new IllegalArgumentException(ROOM_NOT_FOUND));
             room.getMessages().add(message);
             room.getUsers().add(userSender);
             roomRepository.save(room);
@@ -83,7 +85,7 @@ public class MessageService {
 
     public ResponseEntity<List<RoomDto>> getRoomsForUser(String username) {
         var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         var rooms = roomRepository.findAll()
                 .stream()
@@ -97,10 +99,10 @@ public class MessageService {
 
     public ResponseEntity<RoomDto> createRoom(String username, RoomRequestDto roomRequestDto) {
         var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         var userToChatWith = userRepository.findByUsername(roomRequestDto.username())
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         var room = Room.builder()
                 .messages(List.of())
@@ -132,14 +134,14 @@ public class MessageService {
                 .stream()
                 .filter(
                         m -> roomRepository.findById(roomId)
-                                .orElseThrow(() -> new IllegalArgumentException("Room not found"))
+                                .orElseThrow(() -> new IllegalArgumentException(ROOM_NOT_FOUND))
                                 .getUsers()
                                 .stream()
                                 .anyMatch(u -> u.getId().equals(m.getSenderId())))
                 .map(m -> MessageResponseDto.builder()
                         .content(m.getContent())
                         .username(userRepository.findById(m.getSenderId())
-                                .orElseThrow(() -> new UserNotFound("User not found"))
+                                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND))
                                 .getUsername())
                         .createdAt(m.getTimestamp())
                         .roomId(roomId)
@@ -150,9 +152,9 @@ public class MessageService {
 
     public void updateTypingStatus(String roomId, String username, boolean isTyping) {
         var room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ROOM_NOT_FOUND));
         var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFound("User not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         if (isTyping) {
             room.getTypingUsers()
                     .add(user);
@@ -184,7 +186,7 @@ public class MessageService {
                         .map(m -> MessageDto.builder()
                                 .content(m.getContent())
                                 .senderUsername(userRepository.findById(m.getSenderId())
-                                        .orElseThrow(() -> new UserNotFound("User not found"))
+                                        .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND))
                                         .getUsername())
                                 .createdAt(m.getTimestamp())
                                 .build())

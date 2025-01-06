@@ -86,4 +86,13 @@ public class GlobalExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(ImageCreationError.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseBody
+    public ErrorResponse handleImageCreationError(ImageCreationError e) {
+        return ErrorResponse.builder()
+                .message(e.getMessage())
+                .build();
+    }
+
 }
