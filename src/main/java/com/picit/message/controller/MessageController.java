@@ -16,10 +16,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -52,6 +49,18 @@ public class MessageController implements MessageControllerDocumentation {
     @GetMapping("/api/v1/messages/rooms/{roomId}")
     public ResponseEntity<List<MessageResponseDto>> getMessagesForRoom(@PathVariable String roomId) {
         return messageService.getMessagesForRoom(roomId);
+    }
+
+    @PostMapping("/api/v1/messages/{messageId}/seen")
+    public void markMessageAsSeen(@PathVariable String messageId) {
+        messageService.markMessageAsSeen(messageId);
+    }
+
+    @PostMapping("/api/v1/messages/rooms/{roomId}/typing")
+    public void updateTypingStatus(@PathVariable String roomId,
+                                   @RequestParam(name = "username") String username,
+                                   @RequestParam boolean isTyping) {
+        messageService.updateTypingStatus(roomId, username, isTyping);
     }
 
 }

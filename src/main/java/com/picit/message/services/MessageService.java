@@ -43,6 +43,7 @@ public class MessageService {
                 .roomId(conversationId)
                 .content(chatMessage.content())
                 .timestamp(chatMessage.createdAt())
+                .isSeen(false)
                 .build();
         getOrCreateRoom(conversationId, message, userSender);
         messageRepository.save(message);
@@ -69,6 +70,7 @@ public class MessageService {
                     .id(conversationId)
                     .messages(List.of(message))
                     .users(Set.of(userSender))
+                    .typingUsers(Set.of())
                     .build());
         } else {
             var room = roomRepository.findById(conversationId)
@@ -88,25 +90,7 @@ public class MessageService {
                 .filter(room -> room.getUsers()
                         .stream()
                         .anyMatch(u -> u.getId().equals(user.getId())))
-                .map(room -> RoomDto.builder()
-                        .id(room.getId())
-                        .users(room.getUsers().stream()
-                                .map(User::getUsername)
-                                .filter(u -> !u.equals(username))
-                                .toList())
-                        .type(room.getType())
-                        .lastMessage(room.getMessages()
-                                .stream()
-                                .map(m -> MessageDto.builder()
-                                        .content(m.getContent())
-                                        .senderUsername(userRepository.findById(m.getSenderId())
-                                                .orElseThrow(() -> new UserNotFound("User not found"))
-                                                .getUsername())
-                                        .createdAt(m.getTimestamp())
-                                        .build())
-                                .reduce((first, second) -> second)
-                                .orElse(null))
-                        .build())
+                .map(room -> toRoomDto(username, room))
                 .toList();
         return ResponseEntity.ok(rooms);
     }
@@ -121,30 +105,13 @@ public class MessageService {
         var room = Room.builder()
                 .messages(List.of())
                 .users(Set.of(user, userToChatWith))
+                .typingUsers(Set.of())
                 .build();
         var roomRepositoryById = roomRepository.findByUsers(room.getUsers());
         if (roomRepositoryById.isPresent()) {
             room = roomRepositoryById.get();
             return ResponseEntity.ok(
-                    RoomDto.builder()
-                            .id(room.getId())
-                            .type(room.getType())
-                            .users(room.getUsers().stream()
-                                    .map(User::getUsername)
-                                    .filter(u -> !u.equals(username))
-                                    .toList())
-                            .lastMessage(room.getMessages()
-                                    .stream()
-                                    .map(m -> MessageDto.builder()
-                                            .content(m.getContent())
-                                            .senderUsername(userRepository.findById(m.getSenderId())
-                                                    .orElseThrow(() -> new UserNotFound("User not found"))
-                                                    .getUsername())
-                                            .createdAt(m.getTimestamp())
-                                            .build())
-                                    .reduce((first, second) -> second)
-                                    .orElse(null))
-                            .build()
+                    toRoomDto(username, room)
             );
         }
         roomRepository.save(room);
@@ -180,4 +147,50 @@ public class MessageService {
                 .toList();
         return ResponseEntity.ok(messages);
     }
+
+    public void updateTypingStatus(String roomId, String username, boolean isTyping) {
+        var room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Room not found"));
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound("User not found"));
+        if (isTyping) {
+            room.getTypingUsers()
+                    .add(user);
+        } else {
+            room.getTypingUsers()
+                    .remove(user);
+        }
+        roomRepository.save(room);
+        brokerMessagingTemplate.convertAndSend("/topic/typing/" + roomId, room.getTypingUsers());
+    }
+
+    public void markMessageAsSeen(String messageId) {
+        var message = messageRepository.findById(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("Message not found"));
+        message.setIsSeen(true);
+        messageRepository.save(message);
+    }
+
+    private RoomDto toRoomDto(String username, Room room) {
+        return RoomDto.builder()
+                .id(room.getId())
+                .type(room.getType())
+                .users(room.getUsers().stream()
+                        .map(User::getUsername)
+                        .filter(u -> !u.equals(username))
+                        .toList())
+                .lastMessage(room.getMessages()
+                        .stream()
+                        .map(m -> MessageDto.builder()
+                                .content(m.getContent())
+                                .senderUsername(userRepository.findById(m.getSenderId())
+                                        .orElseThrow(() -> new UserNotFound("User not found"))
+                                        .getUsername())
+                                .createdAt(m.getTimestamp())
+                                .build())
+                        .reduce((first, second) -> second)
+                        .orElse(null))
+                .build();
+    }
+
 }

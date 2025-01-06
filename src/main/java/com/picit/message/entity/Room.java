@@ -25,4 +25,6 @@ public class Room {
     private List<Message> messages;
 
     private Message lastMessage;
+
+    private Set<User> typingUsers;
 }
