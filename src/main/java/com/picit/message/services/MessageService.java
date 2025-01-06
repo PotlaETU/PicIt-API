@@ -122,7 +122,7 @@ public class MessageService {
                 .messages(List.of())
                 .users(Set.of(user, userToChatWith))
                 .build();
-        var roomRepositoryById = roomRepository.findById(room.getId());
+        var roomRepositoryById = roomRepository.findByUsers(room.getUsers());
         if (roomRepositoryById.isPresent()) {
             room = roomRepositoryById.get();
             return ResponseEntity.ok(

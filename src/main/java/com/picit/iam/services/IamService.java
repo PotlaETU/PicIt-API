@@ -54,8 +54,8 @@ public class IamService {
         if (userRepository.existsByUsername(signUpRequest.username()) || userRepository.existsByEmail(signUpRequest.email())) {
             throw new ConflictException("Username or email already exists");
         }
-
         var user = userMapper.toUser(signUpRequest);
+        user.setUsername(user.getUsername().toLowerCase());
         var refreshToken = jwtUtil.generateRefreshToken(user);
         user.setSettings(Settings.builder()
                 .build());
@@ -103,12 +103,16 @@ public class IamService {
                     new UsernamePasswordAuthenticationToken(authUser.getUsername(), loginRequest.password())
             );
         } else {
-            authUser = userRepository.findByUsername(loginRequest.username()).orElseThrow(
-                    () -> new UserNotFound(USER_NOT_FOUND)
-            );
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
-            );
+            if (loginRequest.username() != null) {
+                authUser = userRepository.findByUsername(loginRequest.username().toLowerCase()).orElseThrow(
+                        () -> new UserNotFound(USER_NOT_FOUND)
+                );
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(loginRequest.username().toLowerCase(), loginRequest.password())
+                );
+            } else {
+                throw new IllegalArgumentException("Wrong login");
+            }
         }
 
         String token = jwtUtil.generateToken(authUser);
