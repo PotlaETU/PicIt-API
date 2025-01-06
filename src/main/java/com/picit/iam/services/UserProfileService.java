@@ -91,12 +91,13 @@ public class UserProfileService {
         userProfile.setFollowers(userProfileDto.followers() == null ? new ArrayList<>() : userProfileDto.followers());
         userProfile.setBlockedUsers(new ArrayList<>());
 
-        Points points = Points.builder()
-                .userId(userProfile.getUserId())
-                .pointsNb(0)
-                .build();
-
-        pointsRepository.save(points);
+        if (pointsRepository.findByUserId(userProfile.getUserId()).isEmpty()) {
+            Points points = Points.builder()
+                    .userId(userProfile.getUserId())
+                    .pointsNb(0)
+                    .build();
+            pointsRepository.save(points);
+        }
         userProfileRepository.save(userProfile);
         return ResponseEntity.ok().build();
     }
