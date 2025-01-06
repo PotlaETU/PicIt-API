@@ -170,7 +170,14 @@ public class UserProfileService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         return profile.stream()
-                .map(userProfileMapper::toUserProfileDto)
+                .map(u -> {
+                    var points = pointsRepository.findByUserId(u.getUserId())
+                            .orElse(Points.builder()
+                                    .pointsNb(0)
+                                    .build());
+                    Long postCount = postRepository.countPostByUserId(u.getUserId());
+                    return userProfileMapper.toUserProfileDto(u, points, postCount);
+                })
                 .toList();
     }
 
