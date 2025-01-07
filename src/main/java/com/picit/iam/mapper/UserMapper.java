@@ -24,6 +24,7 @@ public interface UserMapper {
     UserProfileDto toUserProfileDto(UserProfile userProfile);
 
     @Mapping(target = "points", source = "points.pointsNb")
+    @Mapping(target = "userId", source = "userProfile.userId")
     UserProfileDto toUserProfileDto(UserProfile userProfile, Points points, Long postCount);
 
 
