@@ -130,10 +130,10 @@ public class UserProfileService {
         }
     }
 
-    public ResponseEntity<byte[]> getProfilePictureUser(String username, String userId) {
+    public ResponseEntity<byte[]> getProfilePictureUser(String username, String usernameToGet) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        User userToGet = userRepository.findById(userId)
+        User userToGet = userRepository.findByUsername(usernameToGet)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var userProfile = userProfileRepository.findByUserId(user.getId());
         var userProfileToGet = userProfileRepository.findByUserId(userToGet.getId());

@@ -4,6 +4,7 @@ import com.picit.iam.controller.documentation.ProfileControllerDocumentation;
 import com.picit.iam.dto.user.SuggestedUserDto;
 import com.picit.iam.dto.user.UserProfileDto;
 import com.picit.iam.services.UserProfileService;
+import com.picit.post.entity.Hobby;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -41,9 +42,9 @@ public class UserProfileController implements ProfileControllerDocumentation {
         return profileService.getProfilePicture(authentication.getName());
     }
 
-    @GetMapping("/picture/{userId}")
-    public ResponseEntity<byte[]> getProfilePicture(@PathVariable("userId") String userId) {
-        return profileService.getProfilePicture(userId);
+    @GetMapping("/picture/{username}")
+    public ResponseEntity<byte[]> getProfilePictureByUsername(Authentication authentication, @PathVariable("username") String username) {
+        return profileService.getProfilePictureUser(authentication.getName(), username);
     }
 
     @PostMapping
@@ -89,6 +90,11 @@ public class UserProfileController implements ProfileControllerDocumentation {
     @GetMapping("/points")
     public UserProfileDto getPoints(Authentication authentication) {
         return profileService.getPoints(authentication.getName());
+    }
+
+    @PostMapping("/hobbies")
+    public ResponseEntity<String> addHobbies(Authentication authentication, @RequestBody List<Hobby> hobbies) {
+        return profileService.updateHobbies(authentication.getName(), hobbies);
     }
 }
 
