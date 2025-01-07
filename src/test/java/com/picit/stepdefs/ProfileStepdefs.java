@@ -39,7 +39,7 @@ public class ProfileStepdefs {
         }
         assertNotNull(responseProfileDto);
         assertEquals("test", responseProfileDto.getBody().username());
-        assertEquals(0, responseProfileDto.getBody().postCount());
+        assertEquals(1, responseProfileDto.getBody().postCount());
     }
 
     @When("I get the profile of {string}")
@@ -89,7 +89,7 @@ public class ProfileStepdefs {
         assertNotNull(responseProfileDto.getBody());
         assertEquals("test", responseProfileDto.getBody().username());
         assertEquals("test", responseProfileDto.getBody().bio());
-        assertEquals(0, responseProfileDto.getBody().postCount());
+        assertEquals(1, responseProfileDto.getBody().postCount());
     }
 
     @When("I create a new user with username {string} and email {string}")

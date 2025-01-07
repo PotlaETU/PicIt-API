@@ -25,7 +25,7 @@ public class PostsStepDefs {
     private ResponseEntity<PostDto[]> responsePostsDto;
 
 
-    @When("^I create a post")
+    @When("I create a post")
     public void iCreateAPost() {
         PostRequestDto testPost = PostRequestDto.builder()
                 .hobby(Hobby.DETENTE)
@@ -124,7 +124,7 @@ public class PostsStepDefs {
         }
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(0, response.getBody().length);
+        assertEquals(1, response.getBody().length);
     }
 
     @When("I update a post")
@@ -156,4 +156,23 @@ public class PostsStepDefs {
     }
 
 
+    @When("I create a post using json")
+    public void iCreateAPostUsingJson() {
+        PostRequestDto testPost = PostRequestDto.builder()
+                .hobby(Hobby.DETENTE)
+                .content("This is a test post")
+                .isPublic(true)
+                .build();
+
+        ResponseEntity<PostDto> response = restTemplate.exchange(
+                baseUrl + "/json",
+                HttpMethod.POST,
+                setAuthHeaderWithBody(testPost),
+                PostDto.class
+        );
+
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        responsePostDto = response;
+    }
 }
