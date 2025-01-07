@@ -154,15 +154,20 @@ public class IamService {
 
             String newAccessToken = jwtUtil.generateToken(user);
             String newRefreshToken = jwtUtil.generateRefreshToken(user);
-            generateCookies(newAccessToken, newRefreshToken);
+            var cookiesList = generateCookies(newAccessToken, newRefreshToken);
+            ResponseCookie jwtCookie = cookiesList.getFirst();
+            ResponseCookie refreshTokenCookie = cookiesList.get(1);
             userRepository.save(user);
             var loginResponse = TokenResponse.builder()
                     .token(newAccessToken)
                     .refreshToken(newRefreshToken)
                     .build();
-            return ResponseEntity.ok(loginResponse);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString(), refreshTokenCookie.toString())
+                    .body(loginResponse);
         } catch (JwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .header(HttpHeaders.SET_COOKIE, jwtUtil.getCleanJwtCookie().toString(), jwtUtil.getCleanRefreshTokenCookie().toString())
                     .body(null);
         }
     }
