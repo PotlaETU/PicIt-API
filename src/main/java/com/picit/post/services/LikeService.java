@@ -55,21 +55,26 @@ public class LikeService {
                         .build());
     }
 
-    public ResponseEntity<Void> unlikePost(String name, String postId) {
+    public ResponseEntity<LikesDto> unlikePost(String name, String postId) {
         var userId = getUserId(name);
         var like = likesRepository.findByUserIdAndPostId(userId, postId)
                 .orElseThrow(() -> new PostNotFound("Like not found"));
         var post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFound("Post not found"));
-        var points = pointsRepository.findByUserId(post.getUserId())
-                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        points.setPointsNb(points.getPointsNb() - PointDefinition.DISLIKE_POST.getPoints());
-        pointsRepository.save(points);
-
+        if (!"1".equals(post.getUserId())) {
+            var points = pointsRepository.findByUserId(post.getUserId())
+                    .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+            points.setPointsNb(points.getPointsNb() - PointDefinition.DISLIKE_POST.getPoints());
+            pointsRepository.save(points);
+        }
         likesRepository.delete(like);
         post.getLikes().remove(like);
         postRepository.save(post);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(
+                LikesDto.builder()
+                        .postId(postId)
+                        .userId(userId)
+                        .build());
     }
 
     private String getUserId(String username) {

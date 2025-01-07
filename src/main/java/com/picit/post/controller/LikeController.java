@@ -21,7 +21,7 @@ public class LikeController implements LikeControllerDocumentation {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> unlikePost(Authentication authentication, @RequestParam("postId") String postId) {
+    public ResponseEntity<LikesDto> unlikePost(Authentication authentication, @RequestParam("postId") String postId) {
         return this.likeService.unlikePost(authentication.getName(), postId);
     }
 }

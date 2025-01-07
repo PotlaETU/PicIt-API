@@ -23,5 +23,5 @@ public interface LikeControllerDocumentation {
             @ApiResponse(responseCode = "200", description = "Like removed"),
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
-    ResponseEntity<Void> unlikePost(Authentication authentication, String postId);
+    ResponseEntity<LikesDto> unlikePost(Authentication authentication, String postId);
 }
