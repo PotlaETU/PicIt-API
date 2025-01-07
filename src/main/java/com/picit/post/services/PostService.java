@@ -266,4 +266,20 @@ public class PostService {
         }
         return ResponseEntity.ok(post.getPostImage().getImageBinary().getData());
     }
+
+    public PostDto getPost(String name, String id) {
+        var post = postRepository.findById(id)
+                .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
+        var userProfile = userProfileRepository.findByUsername(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
+
+        boolean hasAccess = mongoTemplate.exists(query, Post.class);
+
+        if (!hasAccess) {
+            return postMapper.postToPostDto(Post.builder().build());
+        }
+
+        return postMapper.postToPostDto(post);
+    }
 }

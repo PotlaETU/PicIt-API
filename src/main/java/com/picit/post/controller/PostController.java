@@ -38,6 +38,11 @@ public class PostController implements PostControllerDocumentation {
     }
 
     @GetMapping("/{id}")
+    public PostDto getPost(Authentication authentication, @PathVariable String id) {
+        return postService.getPost(authentication.getName(), id);
+    }
+
+    @GetMapping("/image/{id}")
     public ResponseEntity<byte[]> getPostImage(Authentication authentication, @PathVariable String id) {
         return postService.getPostImage(authentication.getName(), id);
     }
