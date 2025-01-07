@@ -162,8 +162,11 @@ public class IamService {
                     .token(newAccessToken)
                     .refreshToken(newRefreshToken)
                     .build();
-            return ResponseEntity.status(HttpStatus.OK)
-                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString(), refreshTokenCookie.toString())
+            logger.info("Token refreshed for username: {}", user.getUsername());
+            logger.info("Token refreshed: {}", cookiesList);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookiesList.get(0).toString())
+                    .header(HttpHeaders.SET_COOKIE, cookiesList.get(1).toString())
                     .body(loginResponse);
         } catch (JwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
