@@ -114,6 +114,8 @@ public class PostService {
             pointsRepository.save(points);
         }
         setPostImage(post, file, user);
+        post.setLikes(List.of());
+        post.setComments(List.of());
         postRepository.save(post);
         return postMapper.postToPostDto(post);
     }
