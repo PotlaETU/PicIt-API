@@ -17,8 +17,10 @@ public interface PostCriteria {
     }
 
     static Criteria postsVisibility(List<String> follows) {
-        return Criteria.where(USER_ID).in(follows)
-                .orOperator(Criteria.where("isPublic").is(true));
+        return new Criteria().orOperator(
+                Criteria.where(USER_ID).in(follows),
+                Criteria.where("isPublic").is(true)
+        );
     }
 
     static Criteria postImageVisibility(List<String> follows, String userId) {
