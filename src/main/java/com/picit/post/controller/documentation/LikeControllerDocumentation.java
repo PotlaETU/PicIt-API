@@ -1,5 +1,6 @@
 package com.picit.post.controller.documentation;
 
+import com.picit.post.dto.like.LikesDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,7 +16,7 @@ public interface LikeControllerDocumentation {
             @ApiResponse(responseCode = "200", description = "Like set"),
             @ApiResponse(responseCode = "404", description = "Post not found")
     })
-    ResponseEntity<Void> likePost(Authentication authentication, String postId);
+    ResponseEntity<LikesDto> likePost(Authentication authentication, String postId);
 
     @Operation(summary = "Unlike a post", description = "Make the user unlike a post")
     @ApiResponses(value = {
