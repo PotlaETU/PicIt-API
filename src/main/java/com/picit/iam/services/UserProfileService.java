@@ -20,6 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +47,7 @@ public class UserProfileService {
     private static final String USER_NOT_FOUND = "User not found";
     private static final String USER_NOT_FOUND_POINTS = "Points for user not found";
     private final PostRepository postRepository;
+    private final MongoTemplate mongoTemplate;
 
     @Value("${generate-ai-images.uri}")
     private String urlAi;
@@ -193,16 +198,20 @@ public class UserProfileService {
         return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<Void> followUser(String name, String usernameUserToFollow) {
+    public ResponseEntity<Void> followUser(String name, String userIdToFollow) {
         var userProfile = getUserProfile(name)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var userToFollow = userRepository.findByUsername(usernameUserToFollow)
+        var userToFollow = userRepository.findById(userIdToFollow)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        userProfile.getFollows().add(userToFollow.getId());
-        var userToFollowProfile = userProfileRepository.findByUserId(userToFollow.getId());
-        userToFollowProfile.getFollowers().add(userProfile.getUserId());
-        userProfileRepository.save(userToFollowProfile);
-        userProfileRepository.save(userProfile);
+
+        Query followerQuery = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Update followerUpdate = new Update().addToSet("follows", userIdToFollow);
+        mongoTemplate.updateFirst(followerQuery, followerUpdate, UserProfile.class);
+
+        Query followedQuery = new Query(Criteria.where("userId").is(userToFollow.getId()));
+        Update followedUpdate = new Update().addToSet("followers", userProfile.getUserId());
+        mongoTemplate.updateFirst(followedQuery, followedUpdate, UserProfile.class);
+
         return ResponseEntity.ok().build();
     }
 
@@ -230,16 +239,20 @@ public class UserProfileService {
                 .toList();
     }
 
-    public ResponseEntity<String> unfollowUser(String name, String username) {
+    public ResponseEntity<Void> unfollowUser(String name, String userId) {
         var userProfile = getUserProfile(name)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var userToUnfollow = userRepository.findByUsername(username)
+        var userToUnfollow = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        userProfile.getFollows().remove(userToUnfollow.getId());
-        var userToUnfollowProfile = userProfileRepository.findByUserId(userToUnfollow.getId());
-        userToUnfollowProfile.getFollowers().remove(userProfile.getUserId());
-        userProfileRepository.save(userToUnfollowProfile);
-        userProfileRepository.save(userProfile);
+
+        Query followerQuery = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Update followerUpdate = new Update().pull("follows", userToUnfollow.getId());
+        mongoTemplate.updateFirst(followerQuery, followerUpdate, UserProfile.class);
+
+        Query followedQuery = new Query(Criteria.where("userId").is(userToUnfollow.getId()));
+        Update followedUpdate = new Update().pull("followers", userProfile.getUserId());
+        mongoTemplate.updateFirst(followedQuery, followedUpdate, UserProfile.class);
+
         return ResponseEntity.ok().build();
     }
 

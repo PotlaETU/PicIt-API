@@ -58,13 +58,13 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @PostMapping("/follow")
-    public ResponseEntity<Void> followUser(Authentication authentication, @RequestParam("username") String username) {
-        return profileService.followUser(authentication.getName(), username);
+    public ResponseEntity<Void> followUser(Authentication authentication, @RequestParam("userId") String userId) {
+        return profileService.followUser(authentication.getName(), userId);
     }
 
     @PostMapping("/unfollow")
-    public ResponseEntity<String> unfollowUser(Authentication authentication, @RequestParam("username") String username) {
-        return profileService.unfollowUser(authentication.getName(), username);
+    public ResponseEntity<Void> unfollowUser(Authentication authentication, @RequestParam("userId") String userId) {
+        return profileService.unfollowUser(authentication.getName(), userId);
     }
 
     @GetMapping("/followers")
@@ -78,8 +78,8 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @PostMapping("/block")
-    public ResponseEntity<Void> blockUser(Authentication authentication, @RequestParam("username") String username) {
-        return profileService.blockUser(authentication.getName(), username);
+    public ResponseEntity<Void> blockUser(Authentication authentication, @RequestParam("userId") String userId) {
+        return profileService.blockUser(authentication.getName(), userId);
     }
 
     @GetMapping("/suggestions")
