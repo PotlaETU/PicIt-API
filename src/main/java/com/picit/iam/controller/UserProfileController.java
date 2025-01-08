@@ -53,8 +53,8 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @GetMapping("/search")
-    public List<UserProfileDto> searchProfiles(@RequestParam("query") String query) {
-        return profileService.searchProfiles(query);
+    public List<UserProfileDto> searchProfiles(Authentication authentication, @RequestParam("query") String query) {
+        return profileService.searchProfiles(authentication.getName(), query);
     }
 
     @PostMapping("/follow")

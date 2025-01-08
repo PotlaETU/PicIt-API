@@ -172,11 +172,16 @@ public class UserProfileService {
         return Optional.of(userProfile);
     }
 
-    public List<UserProfileDto> searchProfiles(String query) {
+    public List<UserProfileDto> searchProfiles(String username, String query) {
         var profile = userProfileRepository.findByUsernameRegex(".*" + query + ".*")
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         return profile.stream()
+                .filter(u -> !u.getUsername().equals(username))
+                .filter(u -> !u.getBlockedUsers()
+                        .contains(user.getId()))
                 .map(u -> {
                     var points = pointsRepository.findByUserId(u.getUserId())
                             .orElse(Points.builder()
