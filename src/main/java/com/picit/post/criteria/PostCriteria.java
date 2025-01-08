@@ -13,7 +13,7 @@ public interface PostCriteria {
     }
 
     static Criteria postsByHobby(String hobby) {
-        return Criteria.where("hobbies").is(hobby);
+        return Criteria.where("hobby").is(hobby);
     }
 
     static Criteria postsVisibility(List<String> follows, String userId) {
