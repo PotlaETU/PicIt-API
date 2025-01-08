@@ -73,7 +73,7 @@ public class PostService {
         var userProfile = userProfileRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
-        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows(), userProfile.getUserId()));
         return getPostDtos(hobby, page, pageSize, query).getContent();
     }
 
@@ -207,7 +207,7 @@ public class PostService {
     public List<PostDto> searchPost(String username, String search) {
         var userProfile = userProfileRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows(), userProfile.getUserId()));
         List<Post> posts = postRepository.findPostsByContentRegex(".*" + search + ".*")
                 .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         List<Post> postsForUser = mongoTemplate.find(query, Post.class)
@@ -274,7 +274,7 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         var userProfile = userProfileRepository.findByUsername(name)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows(), userProfile.getUserId()));
 
         boolean hasAccess = mongoTemplate.exists(query, Post.class);
 
