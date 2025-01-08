@@ -281,7 +281,9 @@ public class UserProfileService {
         var profile = getUserProfile(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var points = pointsRepository.findByUserId(profile.getUserId())
-                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
+                .orElse(Points.builder()
+                        .pointsNb(0)
+                        .build());
         Long postCount = postRepository.countPostByUserId(profile.getUserId());
         return userProfileMapper.toUserProfileDto(profile, points, postCount);
     }

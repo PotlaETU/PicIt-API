@@ -155,8 +155,6 @@ public class IamService {
             String newAccessToken = jwtUtil.generateToken(user);
             String newRefreshToken = jwtUtil.generateRefreshToken(user);
             var cookiesList = generateCookies(newAccessToken, newRefreshToken);
-            ResponseCookie jwtCookie = cookiesList.getFirst();
-            ResponseCookie refreshTokenCookie = cookiesList.get(1);
             userRepository.save(user);
             var loginResponse = TokenResponse.builder()
                     .token(newAccessToken)

@@ -11,7 +11,6 @@ import io.cucumber.java.en.When;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 
 import static com.picit.utils.TestContext.setAuthHeaderWithBody;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -174,5 +173,30 @@ public class PostsStepDefs {
         assertNotNull(response);
         assertNotNull(response.getBody());
         responsePostDto = response;
+    }
+
+    @When("I like a post")
+    public void iLikeAPost() {
+        String baseUrlLikes = "http://localhost:8081/api/v1/like";
+        ResponseEntity<Void> response = restTemplate.exchange(
+                baseUrlLikes + "?postId=" + TestContext.getPostId(),
+                HttpMethod.POST,
+                setAuthHeaderWithBody(null),
+                Void.class);
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Then("The post should be liked")
+    public void thePostShouldBeLiked() {
+        ResponseEntity<PostDto> response = restTemplate.exchange(
+                baseUrl + "/" + TestContext.getPostId(),
+                HttpMethod.GET,
+                setAuthHeaderWithBody(null),
+                PostDto.class);
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().likes().toArray().length);
     }
 }
