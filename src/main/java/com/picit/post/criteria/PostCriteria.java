@@ -16,13 +16,15 @@ public interface PostCriteria {
         return Criteria.where("hobbies").is(hobby);
     }
 
-    static Criteria postsVisibility(List<String> follows) {
-        return new Criteria().orOperator(
-                Criteria.where(USER_ID).in(follows),
-                Criteria.where("isPublic").is(true)
+    static Criteria postsVisibility(List<String> follows, String userId) {
+        return new Criteria().andOperator(
+                Criteria.where(USER_ID).ne(userId),
+                new Criteria().orOperator(
+                        Criteria.where(USER_ID).in(follows),
+                        Criteria.where("isPublic").is(true)
+                )
         );
     }
-
     static Criteria postImageVisibility(List<String> follows, String userId) {
         return new Criteria().orOperator(
                 Criteria.where("isPublic").is(true),
