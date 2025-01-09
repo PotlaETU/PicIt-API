@@ -61,12 +61,12 @@ public class CommentService {
         }
     }
 
-    public ResponseEntity<CommentDto> updateComment(String name, CommentRequestDto commentRequestDto) {
+    public ResponseEntity<CommentDto> updateComment(String name, CommentRequestDto commentRequestDto, String commentId) {
         var userId = userRepository.findByUsername(name)
                 .map(User::getId)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
-        var comment = commentRepository.findById(commentRequestDto.commentId())
+        var comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new UserNotFound(COMMENT_NOT_FOUND));
         if (comment.getContent().isBlank()) {
             return ResponseEntity.status(400).build();

@@ -32,7 +32,9 @@ public class CommentController implements CommentControllerDocumentation {
     }
 
     @PutMapping
-    public ResponseEntity<CommentDto> updateComment(Authentication authentication, @Valid @RequestBody CommentRequestDto commentRequestDto) {
-        return commentService.updateComment(authentication.getName(), commentRequestDto);
+    public ResponseEntity<CommentDto> updateComment(Authentication authentication,
+                                                    @Valid @RequestBody CommentRequestDto commentRequestDto,
+                                                    @RequestParam("commentId") String commentId) {
+        return commentService.updateComment(authentication.getName(), commentRequestDto, commentId);
     }
 }
