@@ -71,7 +71,6 @@ public class MessageService {
             roomRepository.save(Room.builder()
                     .id(conversationId)
                     .messages(List.of(message))
-                    .users(Set.of(userSender))
                     .typingUsers(Set.of())
                     .build());
         } else {
@@ -167,11 +166,20 @@ public class MessageService {
         brokerMessagingTemplate.convertAndSend("/topic/typing/" + roomId, room.getTypingUsers());
     }
 
-    public void markMessageAsSeen(String messageId) {
-        var message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new IllegalArgumentException("Message not found"));
-        message.setIsSeen(true);
-        messageRepository.save(message);
+    public ResponseEntity<Void> markMessageAsSeen(String username, String roomId) {
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException(ROOM_NOT_FOUND));
+        room.getMessages()
+                .stream()
+                .filter(m -> !m.getSenderId().equals(user.getId()))
+                .forEach(m -> {
+                    m.setIsSeen(true);
+                    messageRepository.save(m);
+                });
+        roomRepository.save(room);
+        return ResponseEntity.ok().build();
     }
 
     private RoomDto toRoomDto(String username, Room room) {

@@ -51,9 +51,9 @@ public class MessageController implements MessageControllerDocumentation {
         return messageService.getMessagesForRoom(roomId);
     }
 
-    @PostMapping("/api/v1/messages/{messageId}/seen")
-    public void markMessageAsSeen(@PathVariable String messageId) {
-        messageService.markMessageAsSeen(messageId);
+    @PostMapping("/api/v1/messages/{roomId}/seen")
+    public ResponseEntity<Void> markMessageAsSeen(Authentication authentication, @PathVariable String roomId) {
+        return messageService.markMessageAsSeen(authentication.getName(), roomId);
     }
 
     @PostMapping("/api/v1/messages/rooms/{roomId}/typing")
