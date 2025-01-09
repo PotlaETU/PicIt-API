@@ -144,6 +144,7 @@ public class MessageService {
                                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND))
                                 .getUsername())
                         .createdAt(m.getTimestamp())
+                        .isSeen(m.getIsSeen())
                         .roomId(roomId)
                         .build())
                 .toList();

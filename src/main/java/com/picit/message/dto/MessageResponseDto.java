@@ -9,6 +9,7 @@ public record MessageResponseDto(
         String username,
         String content,
         String roomId,
+        Boolean isSeen,
         LocalDateTime createdAt
 ) {
 }
