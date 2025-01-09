@@ -161,7 +161,6 @@ public class IamService {
                     .refreshToken(newRefreshToken)
                     .build();
             logger.info("Token refreshed for username: {}", user.getUsername());
-            logger.info("Token refreshed: {}", cookiesList);
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookiesList.get(0).toString())
                     .header(HttpHeaders.SET_COOKIE, cookiesList.get(1).toString())
