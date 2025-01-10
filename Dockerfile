@@ -9,4 +9,4 @@ ENV APP_HOME=/usr/app
 WORKDIR $APP_HOME
 COPY --from=BUILD $APP_HOME/build/libs/$JAR_NAME .
 EXPOSE 8081
-ENTRYPOINT ["java", "-jar", "picit-api-1.4.0.jar"]
+ENTRYPOINT ["java", "-jar", "picit-api-1.5.0.jar"]
