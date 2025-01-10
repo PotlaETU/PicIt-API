@@ -216,6 +216,9 @@ public class MessageService {
         var userRooms = roomRepository.findByUsersContaining(user);
         List<Message> latestsMessage = new ArrayList<>();
         userRooms.forEach(room -> latestsMessage.add(room.getLastMessage()));
+        if (latestsMessage.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
         return ResponseEntity.ok(latestsMessage.stream()
                 .map(m -> MessageResponseDto.builder()
                         .content(m.getContent())
