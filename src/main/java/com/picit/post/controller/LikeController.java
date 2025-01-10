@@ -1,6 +1,7 @@
 package com.picit.post.controller;
 
 import com.picit.post.controller.documentation.LikeControllerDocumentation;
+import com.picit.post.dto.like.LikesDto;
 import com.picit.post.services.LikeService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +16,12 @@ public class LikeController implements LikeControllerDocumentation {
     private final LikeService likeService;
 
     @PostMapping
-    public ResponseEntity<Void> likePost(Authentication authentication, @RequestParam("postId") String postId) {
+    public ResponseEntity<LikesDto> likePost(Authentication authentication, @RequestParam("postId") String postId) {
         return this.likeService.likePost(authentication.getName(), postId);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> unlikePost(Authentication authentication, @RequestParam("postId") String postId) {
+    public ResponseEntity<LikesDto> unlikePost(Authentication authentication, @RequestParam("postId") String postId) {
         return this.likeService.unlikePost(authentication.getName(), postId);
     }
 }

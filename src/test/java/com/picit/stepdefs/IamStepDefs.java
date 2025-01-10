@@ -66,7 +66,7 @@ public class IamStepDefs {
 
     @When("I logout")
     public void iLogout() {
-        String token = testContext.getJwtToken();
+        String token = TestContext.getJwtToken();
         if (token == null) {
             throw new IllegalStateException("JWT token not found. Ensure the login step is executed first.");
         }

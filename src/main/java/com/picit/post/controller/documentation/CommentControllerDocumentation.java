@@ -9,9 +9,9 @@ import org.springframework.security.core.Authentication;
 @Tag(name = "Comment", description = "Comment management")
 public interface CommentControllerDocumentation {
 
-    CommentDto createComment(Authentication authentication, CommentRequestDto commentRequestDto);
+    CommentDto createComment(Authentication authentication, CommentRequestDto commentRequestDto, String postId);
 
-    ResponseEntity<Void> deleteComment(Authentication authentication, String commentId);
+    ResponseEntity<Void> deleteComment(Authentication authentication, String commentId, String postId);
 
-    ResponseEntity<CommentDto> updateComment(Authentication authentication, CommentRequestDto commentRequestDto);
+    ResponseEntity<CommentDto> updateComment(Authentication authentication, CommentRequestDto commentRequestDto, String postId);
 }

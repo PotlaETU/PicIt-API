@@ -3,6 +3,7 @@ package com.picit.post.services;
 import com.picit.iam.dto.responsetype.MessageResponse;
 import com.picit.iam.entity.User;
 import com.picit.iam.entity.points.PointDefinition;
+import com.picit.iam.exceptions.ImageCreationError;
 import com.picit.iam.exceptions.PostNotFound;
 import com.picit.iam.exceptions.UserNotFound;
 import com.picit.iam.repository.UserProfileRepository;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.http.HttpStatus;
@@ -72,7 +74,7 @@ public class PostService {
         var userProfile = userProfileRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
-        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows(), userProfile.getUserId()));
         return getPostDtos(hobby, page, pageSize, query).getContent();
     }
 
@@ -86,13 +88,11 @@ public class PostService {
 
         query.with(pageable);
         List<Post> posts = mongoTemplate.find(query, Post.class);
-        posts = posts.stream()
-                .peek(post -> {
-                    post.setUsernameCreator(userRepository.findById(post.getUserId())
-                            .map(User::getUsername)
-                            .orElse(""));
-                })
-                .toList();
+        for (Post post : posts) {
+            post.setUsernameCreator(userRepository.findById(post.getUserId())
+                    .map(User::getUsername)
+                    .orElse(""));
+        }
         return PageableExecutionUtils.getPage(posts.stream()
                 .map(postMapper::postToPostDto)
                 .toList(), pageable, () -> total);
@@ -115,6 +115,8 @@ public class PostService {
             pointsRepository.save(points);
         }
         setPostImage(post, file, user);
+        post.setLikes(List.of());
+        post.setComments(List.of());
         postRepository.save(post);
         return postMapper.postToPostDto(post);
     }
@@ -131,7 +133,7 @@ public class PostService {
                 postImageRepository.save(postImage);
                 post.setPostImage(postImage);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to save post image", e);
+                throw new ImageCreationError("Failed to save post image", e);
             }
         }
     }
@@ -206,7 +208,7 @@ public class PostService {
     public List<PostDto> searchPost(String username, String search) {
         var userProfile = userProfileRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows()));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows(), userProfile.getUserId()));
         List<Post> posts = postRepository.findPostsByContentRegex(".*" + search + ".*")
                 .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
         List<Post> postsForUser = mongoTemplate.find(query, Post.class)
@@ -266,5 +268,21 @@ public class PostService {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(post.getPostImage().getImageBinary().getData());
+    }
+
+    public PostDto getPost(String name, String id) {
+        var post = postRepository.findById(id)
+                .orElseThrow(() -> new PostNotFound(POST_NOT_FOUND));
+        var userProfile = userProfileRepository.findByUsername(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows(), userProfile.getUserId()));
+
+        boolean hasAccess = mongoTemplate.exists(query, Post.class);
+
+        if (!hasAccess) {
+            return postMapper.postToPostDto(Post.builder().build());
+        }
+
+        return postMapper.postToPostDto(post);
     }
 }

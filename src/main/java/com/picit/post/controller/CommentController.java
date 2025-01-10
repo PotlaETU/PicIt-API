@@ -18,17 +18,23 @@ public class CommentController implements CommentControllerDocumentation {
     private final CommentService commentService;
 
     @PostMapping
-    public CommentDto createComment(Authentication authentication, @Valid @RequestBody CommentRequestDto commentRequestDto) {
-        return commentService.createComment(authentication.getName(), commentRequestDto);
+    public CommentDto createComment(Authentication authentication,
+                                    @Valid @RequestBody CommentRequestDto commentRequestDto,
+                                    @RequestParam("postId") String postId) {
+        return commentService.createComment(authentication.getName(), commentRequestDto, postId);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteComment(Authentication authentication, String commentId) {
-        return commentService.deleteComment(authentication.getName(), commentId);
+    public ResponseEntity<Void> deleteComment(Authentication authentication,
+                                              @RequestParam("commentId") String commentId,
+                                              @RequestParam("postId") String postId) {
+        return commentService.deleteComment(authentication.getName(), commentId, postId);
     }
 
     @PutMapping
-    public ResponseEntity<CommentDto> updateComment(Authentication authentication, @Valid @RequestBody CommentRequestDto commentRequestDto) {
-        return commentService.updateComment(authentication.getName(), commentRequestDto);
+    public ResponseEntity<CommentDto> updateComment(Authentication authentication,
+                                                    @Valid @RequestBody CommentRequestDto commentRequestDto,
+                                                    @RequestParam("commentId") String commentId) {
+        return commentService.updateComment(authentication.getName(), commentRequestDto, commentId);
     }
 }

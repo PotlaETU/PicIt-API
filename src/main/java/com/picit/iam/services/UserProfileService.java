@@ -20,6 +20,10 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +45,9 @@ public class UserProfileService {
     private final RestTemplate restTemplate = new RestTemplateBuilder().build();
     private final PointsRepository pointsRepository;
     private static final String USER_NOT_FOUND = "User not found";
+    private static final String USER_NOT_FOUND_POINTS = "Points for user not found";
     private final PostRepository postRepository;
+    private final MongoTemplate mongoTemplate;
 
     @Value("${generate-ai-images.uri}")
     private String urlAi;
@@ -89,13 +95,15 @@ public class UserProfileService {
         userProfile.setHobbies(userProfileDto.hobbies());
         userProfile.setFollows(userProfileDto.follows() == null ? new ArrayList<>() : userProfileDto.follows());
         userProfile.setFollowers(userProfileDto.followers() == null ? new ArrayList<>() : userProfileDto.followers());
+        userProfile.setBlockedUsers(new ArrayList<>());
 
-        Points points = Points.builder()
-                .userId(userProfile.getUserId())
-                .pointsNb(0)
-                .build();
-
-        pointsRepository.save(points);
+        if (pointsRepository.findByUserId(userProfile.getUserId()).isEmpty()) {
+            Points points = Points.builder()
+                    .userId(userProfile.getUserId())
+                    .pointsNb(0)
+                    .build();
+            pointsRepository.save(points);
+        }
         userProfileRepository.save(userProfile);
         return ResponseEntity.ok().build();
     }
@@ -127,6 +135,32 @@ public class UserProfileService {
         }
     }
 
+    public ResponseEntity<byte[]> getProfilePictureUser(String username, String userIdToGet) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        User userToGet = userRepository.findById(userIdToGet)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var userProfile = userProfileRepository.findByUserId(user.getId());
+        var userProfileToGet = userProfileRepository.findByUserId(userToGet.getId());
+
+        if (userProfileToGet.getBlockedUsers().contains(user.getId())) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Image profilePic = userProfile.getProfilePicture();
+        if (profilePic != null) {
+            byte[] profilePicData = userProfileToGet
+                    .getProfilePicture()
+                    .getImageBinary()
+                    .getData();
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(profilePicData);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     private Optional<UserProfile> getUserProfile(String username) {
         var userId = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND))
@@ -138,12 +172,24 @@ public class UserProfileService {
         return Optional.of(userProfile);
     }
 
-    public List<UserProfileDto> searchProfiles(String query) {
+    public List<UserProfileDto> searchProfiles(String username, String query) {
         var profile = userProfileRepository.findByUsernameRegex(".*" + query + ".*")
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         return profile.stream()
-                .map(userProfileMapper::toUserProfileDto)
+                .filter(u -> !u.getUsername().equals(username))
+                .filter(u -> !u.getBlockedUsers()
+                        .contains(user.getId()))
+                .map(u -> {
+                    var points = pointsRepository.findByUserId(u.getUserId())
+                            .orElse(Points.builder()
+                                    .pointsNb(0)
+                                    .build());
+                    Long postCount = postRepository.countPostByUserId(u.getUserId());
+                    return userProfileMapper.toUserProfileDto(u, points, postCount);
+                })
                 .toList();
     }
 
@@ -157,16 +203,20 @@ public class UserProfileService {
         return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<Void> followUser(String name, String usernameUserToFollow) {
+    public ResponseEntity<Void> followUser(String name, String userIdToFollow) {
         var userProfile = getUserProfile(name)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var userToFollow = userRepository.findByUsername(usernameUserToFollow)
+        var userToFollow = userRepository.findById(userIdToFollow)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        userProfile.getFollows().add(userToFollow.getId());
-        var userToFollowProfile = userProfileRepository.findByUserId(userToFollow.getId());
-        userToFollowProfile.getFollowers().add(userProfile.getUserId());
-        userProfileRepository.save(userToFollowProfile);
-        userProfileRepository.save(userProfile);
+
+        Query followerQuery = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Update followerUpdate = new Update().addToSet("follows", userIdToFollow);
+        mongoTemplate.updateFirst(followerQuery, followerUpdate, UserProfile.class);
+
+        Query followedQuery = new Query(Criteria.where("userId").is(userToFollow.getId()));
+        Update followedUpdate = new Update().addToSet("followers", userProfile.getUserId());
+        mongoTemplate.updateFirst(followedQuery, followedUpdate, UserProfile.class);
+
         return ResponseEntity.ok().build();
     }
 
@@ -194,16 +244,20 @@ public class UserProfileService {
                 .toList();
     }
 
-    public ResponseEntity<String> unfollowUser(String name, String username) {
+    public ResponseEntity<Void> unfollowUser(String name, String userId) {
         var userProfile = getUserProfile(name)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var userToUnfollow = userRepository.findByUsername(username)
+        var userToUnfollow = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        userProfile.getFollows().remove(userToUnfollow.getId());
-        var userToUnfollowProfile = userProfileRepository.findByUserId(userToUnfollow.getId());
-        userToUnfollowProfile.getFollowers().remove(userProfile.getUserId());
-        userProfileRepository.save(userToUnfollowProfile);
-        userProfileRepository.save(userProfile);
+
+        Query followerQuery = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Update followerUpdate = new Update().pull("follows", userToUnfollow.getId());
+        mongoTemplate.updateFirst(followerQuery, followerUpdate, UserProfile.class);
+
+        Query followedQuery = new Query(Criteria.where("userId").is(userToUnfollow.getId()));
+        Update followedUpdate = new Update().pull("followers", userProfile.getUserId());
+        mongoTemplate.updateFirst(followedQuery, followedUpdate, UserProfile.class);
+
         return ResponseEntity.ok().build();
     }
 
@@ -235,7 +289,7 @@ public class UserProfileService {
     public UserProfileDto getPoints(String name) {
         var userId = getUser(name).getId();
         var points = pointsRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFound("Points for user not found"));
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
         return UserProfileDto.builder()
                 .points(points.getPointsNb())
                 .build();
@@ -245,7 +299,9 @@ public class UserProfileService {
         var profile = getUserProfile(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var points = pointsRepository.findByUserId(profile.getUserId())
-                .orElseThrow(() -> new UserNotFound("Points for user not found"));
+                .orElse(Points.builder()
+                        .pointsNb(0)
+                        .build());
         Long postCount = postRepository.countPostByUserId(profile.getUserId());
         return userProfileMapper.toUserProfileDto(profile, points, postCount);
     }
@@ -275,4 +331,30 @@ public class UserProfileService {
         return ResponseEntity.ok().build();
     }
 
+    public UserProfileDto getProfileUsername(String username, String usernameToGet) {
+        var profile = userProfileRepository.findByUsername(usernameToGet)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var userToGet = userRepository.findByUsername(usernameToGet)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+
+        if (profile == null || profile.getBlockedUsers().contains(user.getId())) {
+            throw new UserNotFound(USER_NOT_FOUND);
+        }
+        if (profile.getUserId().equals(user.getId())) {
+            return getProfile(username);
+        }
+        if (!profile.getFollowers().contains(user.getId()) && "private".equals(userToGet.getSettings().getPrivacy())) {
+            return UserProfileDto.builder()
+                    .bio(profile.getBio())
+                    .username(profile.getUsername())
+                    .build();
+        }
+
+        var points = pointsRepository.findByUserId(profile.getUserId())
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
+        Long postCount = postRepository.countPostByUserId(profile.getUserId());
+        return userProfileMapper.toUserProfileDto(profile, points, postCount);
+    }
 }

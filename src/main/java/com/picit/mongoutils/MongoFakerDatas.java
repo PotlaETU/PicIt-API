@@ -77,6 +77,8 @@ public class MongoFakerDatas {
                 .createdAt(LocalDateTime.now())
                 .content(getFakerContent())
                 .isPublic(true)
+                .likes(List.of())
+                .comments(List.of())
                 .hobby(Hobby.DETENTE)
                 .userId("1")
                 .build();

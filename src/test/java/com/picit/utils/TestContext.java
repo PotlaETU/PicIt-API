@@ -1,35 +1,48 @@
 package com.picit.utils;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TestContext {
 
-    private String jwtToken;
-    private String userId;
-    private String postId;
+    private static String jwtToken;
+    private static String userId;
+    private static String postId;
 
-    public String getJwtToken() {
+    public static String getJwtToken() {
         return jwtToken;
     }
 
-    public String getUserId() {
+    public static String getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public static void setUserId(String userId) {
+        TestContext.userId = userId;
     }
 
-    public String getPostId() {
+    public static String getPostId() {
         return postId;
     }
 
-    public void setPostId(String postId) {
-        this.postId = postId;
+    public static void setPostId(String postId) {
+        TestContext.postId = postId;
     }
 
     public void setJwtToken(String jwtToken) {
-        this.jwtToken = jwtToken;
+        TestContext.jwtToken = jwtToken;
     }
+
+    public static <T> HttpEntity<T> setAuthHeaderWithBody(T body) {
+        String token = getJwtToken();
+        if (token == null) {
+            throw new IllegalStateException("JWT token not found. Ensure the login step is executed first.");
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        return new HttpEntity<>(body, headers);
+    }
+
 }

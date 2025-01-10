@@ -37,9 +37,8 @@ public class IamController implements IamControllerDocumentation {
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(@RequestBody @Nullable TokenRefreshRequest tokenRefreshRequest,
-                                                 Authentication authentication,
                                                  HttpServletRequest request) {
-        return iamService.refresh(tokenRefreshRequest, authentication.getName(), request);
+        return iamService.refresh(tokenRefreshRequest, request);
     }
 
     @GetMapping("/me")

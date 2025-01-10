@@ -24,16 +24,25 @@ public class PostController implements PostControllerDocumentation {
     private final PostService postService;
 
     @GetMapping("/user")
-    public List<PostDto> getPostUser(Authentication authentication, @RequestParam(required = false) String hobby, @RequestParam(defaultValue = "0") int page) {
+    public List<PostDto> getPostUser(Authentication authentication,
+                                     @RequestParam(required = false, name = "hobby") String hobby,
+                                     @RequestParam(defaultValue = "0", name = "page") int page) {
         return postService.getPostsByUser(authentication.getName(), hobby, page);
     }
 
     @GetMapping
-    public List<PostDto> getPosts(Authentication authentication, @RequestParam(required = false) String hobby, @RequestParam(defaultValue = "0") int page) {
+    public List<PostDto> getPosts(Authentication authentication,
+                                  @RequestParam(required = false, name = "hobby") String hobby,
+                                  @RequestParam(defaultValue = "0", name = "page") int page) {
         return postService.getPosts(authentication.getName(), hobby, page);
     }
 
     @GetMapping("/{id}")
+    public PostDto getPost(Authentication authentication, @PathVariable String id) {
+        return postService.getPost(authentication.getName(), id);
+    }
+
+    @GetMapping("/image/{id}")
     public ResponseEntity<byte[]> getPostImage(Authentication authentication, @PathVariable String id) {
         return postService.getPostImage(authentication.getName(), id);
     }

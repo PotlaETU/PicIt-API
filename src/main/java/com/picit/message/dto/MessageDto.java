@@ -6,9 +6,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record MessageDto (
-        String id,
-        String senderId,
-        String roomId,
+        String senderUsername,
         String content,
         LocalDateTime createdAt
 ) {

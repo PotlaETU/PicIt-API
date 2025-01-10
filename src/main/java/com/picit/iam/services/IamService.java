@@ -17,6 +17,7 @@ import com.picit.iam.mapper.UserMapper;
 import com.picit.iam.repository.UserProfileRepository;
 import com.picit.iam.repository.UserRepository;
 import com.picit.iam.repository.points.PointsRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -53,8 +54,8 @@ public class IamService {
         if (userRepository.existsByUsername(signUpRequest.username()) || userRepository.existsByEmail(signUpRequest.email())) {
             throw new ConflictException("Username or email already exists");
         }
-
         var user = userMapper.toUser(signUpRequest);
+        user.setUsername(user.getUsername().toLowerCase());
         var refreshToken = jwtUtil.generateRefreshToken(user);
         user.setSettings(Settings.builder()
                 .build());
@@ -102,12 +103,16 @@ public class IamService {
                     new UsernamePasswordAuthenticationToken(authUser.getUsername(), loginRequest.password())
             );
         } else {
-            authUser = userRepository.findByUsername(loginRequest.username()).orElseThrow(
-                    () -> new UserNotFound(USER_NOT_FOUND)
-            );
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
-            );
+            if (loginRequest.username() != null) {
+                authUser = userRepository.findByUsername(loginRequest.username().toLowerCase()).orElseThrow(
+                        () -> new UserNotFound(USER_NOT_FOUND)
+                );
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(loginRequest.username().toLowerCase(), loginRequest.password())
+                );
+            } else {
+                throw new IllegalArgumentException("Wrong login");
+            }
         }
 
         String token = jwtUtil.generateToken(authUser);
@@ -126,29 +131,45 @@ public class IamService {
                 .body(loginResponse);
     }
 
-    public ResponseEntity<TokenResponse> refresh(TokenRefreshRequest tokenRefreshRequest, String username, HttpServletRequest http) {
-        String refreshToken = tokenRefreshRequest != null ? tokenRefreshRequest.refreshToken() : null;
-        if (refreshToken == null) {
-            refreshToken = getTokenFromCookie("refreshToken", http);
+    public ResponseEntity<TokenResponse> refresh(TokenRefreshRequest tokenRefreshRequest, HttpServletRequest http) {
+        try {
+            String refreshToken = tokenRefreshRequest != null ? tokenRefreshRequest.refreshToken() : null;
+            if (refreshToken == null) {
+                refreshToken = getTokenFromCookie("refreshToken", http);
+            }
+
+            if (refreshToken == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(null);
+            }
+
+            if (jwtUtil.isTokenExpired(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(null);
+            }
+
+            String usernameToken = jwtUtil.extractUsername(refreshToken);
+            User user = userRepository.findByUsername(usernameToken)
+                    .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+
+            String newAccessToken = jwtUtil.generateToken(user);
+            String newRefreshToken = jwtUtil.generateRefreshToken(user);
+            var cookiesList = generateCookies(newAccessToken, newRefreshToken);
+            userRepository.save(user);
+            var loginResponse = TokenResponse.builder()
+                    .token(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
+            logger.info("Token refreshed for username: {}", user.getUsername());
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookiesList.get(0).toString())
+                    .header(HttpHeaders.SET_COOKIE, cookiesList.get(1).toString())
+                    .body(loginResponse);
+        } catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .header(HttpHeaders.SET_COOKIE, jwtUtil.getCleanJwtCookie().toString(), jwtUtil.getCleanRefreshTokenCookie().toString())
+                    .body(null);
         }
-        String usernameToken = jwtUtil.extractUsername(refreshToken);
-
-        User user = userRepository.findByUsername(usernameToken).orElseThrow(
-                () -> new UserNotFound(USER_NOT_FOUND)
-        );
-        if (jwtUtil.isTokenExpired(refreshToken) || !username.equals(usernameToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-
-        String newAccessToken = jwtUtil.generateToken(user);
-        String newRefreshToken = jwtUtil.generateRefreshToken(user);
-        userRepository.save(user);
-
-        var loginResponse = TokenResponse.builder()
-                .token(newAccessToken)
-                .refreshToken(newRefreshToken)
-                .build();
-        return ResponseEntity.ok(loginResponse);
     }
 
     public ResponseEntity<MessageResponse> logout(HttpServletRequest request) {

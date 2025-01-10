@@ -4,6 +4,7 @@ import com.picit.iam.controller.documentation.ProfileControllerDocumentation;
 import com.picit.iam.dto.user.SuggestedUserDto;
 import com.picit.iam.dto.user.UserProfileDto;
 import com.picit.iam.services.UserProfileService;
+import com.picit.post.entity.Hobby;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,9 +32,19 @@ public class UserProfileController implements ProfileControllerDocumentation {
         return profileService.getProfile(authentication.getName());
     }
 
+    @GetMapping("/{username}")
+    public UserProfileDto getProfile(Authentication authentication, @PathVariable("username") String username) {
+        return profileService.getProfileUsername(authentication.getName(), username);
+    }
+
     @GetMapping("/picture")
     public ResponseEntity<byte[]> getProfilePicture(Authentication authentication) {
         return profileService.getProfilePicture(authentication.getName());
+    }
+
+    @GetMapping("/picture/{username}")
+    public ResponseEntity<byte[]> getProfilePictureByUsername(Authentication authentication, @PathVariable("username") String username) {
+        return profileService.getProfilePictureUser(authentication.getName(), username);
     }
 
     @PostMapping
@@ -42,18 +53,18 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @GetMapping("/search")
-    public List<UserProfileDto> searchProfiles(@RequestParam("query") String query) {
-        return profileService.searchProfiles(query);
+    public List<UserProfileDto> searchProfiles(Authentication authentication, @RequestParam("query") String query) {
+        return profileService.searchProfiles(authentication.getName(), query);
     }
 
     @PostMapping("/follow")
-    public ResponseEntity<Void> followUser(Authentication authentication, @RequestParam("username") String username) {
-        return profileService.followUser(authentication.getName(), username);
+    public ResponseEntity<Void> followUser(Authentication authentication, @RequestParam("userId") String userId) {
+        return profileService.followUser(authentication.getName(), userId);
     }
 
     @PostMapping("/unfollow")
-    public ResponseEntity<String> unfollowUser(Authentication authentication, @RequestParam("username") String username) {
-        return profileService.unfollowUser(authentication.getName(), username);
+    public ResponseEntity<Void> unfollowUser(Authentication authentication, @RequestParam("userId") String userId) {
+        return profileService.unfollowUser(authentication.getName(), userId);
     }
 
     @GetMapping("/followers")
@@ -67,8 +78,8 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @PostMapping("/block")
-    public ResponseEntity<Void> blockUser(Authentication authentication, @RequestParam("username") String username) {
-        return profileService.blockUser(authentication.getName(), username);
+    public ResponseEntity<Void> blockUser(Authentication authentication, @RequestParam("userId") String userId) {
+        return profileService.blockUser(authentication.getName(), userId);
     }
 
     @GetMapping("/suggestions")
@@ -79,6 +90,11 @@ public class UserProfileController implements ProfileControllerDocumentation {
     @GetMapping("/points")
     public UserProfileDto getPoints(Authentication authentication) {
         return profileService.getPoints(authentication.getName());
+    }
+
+    @PostMapping("/hobbies")
+    public ResponseEntity<String> addHobbies(Authentication authentication, @RequestBody List<Hobby> hobbies) {
+        return profileService.updateHobbies(authentication.getName(), hobbies);
     }
 }
 

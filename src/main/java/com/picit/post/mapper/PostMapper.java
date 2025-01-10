@@ -18,6 +18,8 @@ public interface PostMapper {
     @Mapping(target = "userId", source = "id")
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "postImage", ignore = true)
+    @Mapping(target = "usernameCreator", ignore = true)
+    @Mapping(target = "images", ignore = true)
     Post postRequestDtoToPost(PostRequestDto postRequestDto, String id);
 
     @Mapping(target = "id", ignore = true)
@@ -27,5 +29,7 @@ public interface PostMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "postImage", ignore = true)
+    @Mapping(target = "usernameCreator", ignore = true)
+    @Mapping(target = "images", ignore = true)
     Post updatePostFromPostRequestDto(PostRequestDto postRequestDto, @MappingTarget Post post);
 }

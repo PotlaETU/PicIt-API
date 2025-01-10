@@ -16,8 +16,15 @@ import java.time.LocalDateTime;
 public class Message {
     @Id
     private String id;
+
     private String senderId;
+
     private String roomId;
+
     private String content;
+
+    private Boolean isSeen;
+
     private LocalDateTime timestamp;
+
 }
