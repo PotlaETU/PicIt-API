@@ -18,9 +18,9 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -56,6 +56,10 @@ public class MessageService {
         } else {
             sessionAttributes.put("username", chatMessage.senderUsername());
             brokerMessagingTemplate.convertAndSend("/topic/messages" + conversationId, chatMessage);
+            var room = roomRepository.findById(conversationId)
+                    .orElseThrow(() -> new IllegalArgumentException(ROOM_NOT_FOUND));
+            room.setLastMessage(message);
+            roomRepository.save(room);
             log.info("message sent to room {}", conversationId);
         }
 
@@ -210,12 +214,9 @@ public class MessageService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         var userRooms = roomRepository.findByUsersContaining(user);
-
-        var roomIds = userRooms.stream()
-                .map(Room::getId)
-                .collect(Collectors.toSet());
-
-        var messages = messageRepository.findByRoomIdIn(roomIds).stream()
+        List<Message> latestsMessage = new ArrayList<>();
+        userRooms.forEach(room -> latestsMessage.add(room.getLastMessage()));
+        return ResponseEntity.ok(latestsMessage.stream()
                 .map(m -> MessageResponseDto.builder()
                         .content(m.getContent())
                         .username(userRepository.findById(m.getSenderId())
@@ -225,7 +226,6 @@ public class MessageService {
                         .isSeen(m.getIsSeen())
                         .roomId(m.getRoomId())
                         .build())
-                .toList();
-
-        return ResponseEntity.ok(messages);
-    }}
+                .toList());
+    }
+}
