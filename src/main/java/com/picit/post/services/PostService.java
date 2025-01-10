@@ -27,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.http.HttpStatus;
@@ -80,7 +81,10 @@ public class PostService {
     @NotNull
     private Page<PostDto> getPostDtos(String hobby, int page, int pageSize, Query query) {
         if (hobby != null) {
-            query.addCriteria(PostCriteria.postsByHobby(hobby));
+            query.addCriteria(new Criteria().andOperator(
+                    Criteria.where("hobbies").is(hobby),
+                    PostCriteria.postsByHobby(hobby)
+            ));
         }
         long total = mongoTemplate.count(query.skip(-1).limit(-1), Post.class);
         Pageable pageable = PageRequest.of(page, pageSize);
