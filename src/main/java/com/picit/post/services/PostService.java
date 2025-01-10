@@ -81,10 +81,7 @@ public class PostService {
     @NotNull
     private Page<PostDto> getPostDtos(String hobby, int page, int pageSize, Query query) {
         if (hobby != null) {
-            query.addCriteria(new Criteria().andOperator(
-                    Criteria.where("hobbies").is(hobby),
-                    PostCriteria.postsByHobby(hobby)
-            ));
+            query.addCriteria(PostCriteria.postsByHobby(hobby));
         }
         long total = mongoTemplate.count(query.skip(-1).limit(-1), Post.class);
         Pageable pageable = PageRequest.of(page, pageSize);
