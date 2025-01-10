@@ -63,4 +63,9 @@ public class MessageController implements MessageControllerDocumentation {
         messageService.updateTypingStatus(roomId, username, isTyping);
     }
 
+    @GetMapping("/api/v1/messages/latest")
+    public ResponseEntity<List<MessageResponseDto>> getLatestMessages(Authentication authentication) {
+        return messageService.getLatestMessages(authentication.getName());
+    }
+
 }

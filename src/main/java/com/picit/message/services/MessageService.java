@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -204,4 +205,27 @@ public class MessageService {
                 .build();
     }
 
-}
+    public ResponseEntity<List<MessageResponseDto>> getLatestMessages(String name) {
+        var user = userRepository.findByUsername(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+
+        var userRooms = roomRepository.findByUsersContaining(user);
+
+        var roomIds = userRooms.stream()
+                .map(Room::getId)
+                .collect(Collectors.toSet());
+
+        var messages = messageRepository.findByRoomIdIn(roomIds).stream()
+                .map(m -> MessageResponseDto.builder()
+                        .content(m.getContent())
+                        .username(userRepository.findById(m.getSenderId())
+                                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND))
+                                .getUsername())
+                        .createdAt(m.getTimestamp())
+                        .isSeen(m.getIsSeen())
+                        .roomId(m.getRoomId())
+                        .build())
+                .toList();
+
+        return ResponseEntity.ok(messages);
+    }}
