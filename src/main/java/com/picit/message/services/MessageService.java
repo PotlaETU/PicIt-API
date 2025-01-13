@@ -104,23 +104,22 @@ public class MessageService {
     public ResponseEntity<RoomDto> createRoom(String username, RoomRequestDto roomRequestDto) {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-
         var userToChatWith = userRepository.findByUsername(roomRequestDto.username())
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
+        var existingRoom = roomRepository.findByUsers(Set.of(user, userToChatWith));
+        if (existingRoom.isPresent()) {
+            return ResponseEntity.ok(toRoomDto(username, existingRoom.get()));
+        }
+
         var room = Room.builder()
-                .messages(List.of())
                 .users(Set.of(user, userToChatWith))
+                .messages(List.of())
                 .typingUsers(Set.of())
                 .build();
-        var roomRepositoryById = roomRepository.findByUsers(room.getUsers());
-        if (roomRepositoryById.isPresent()) {
-            room = roomRepositoryById.get();
-            return ResponseEntity.ok(
-                    toRoomDto(username, room)
-            );
-        }
+
         roomRepository.save(room);
+
         return ResponseEntity.ok(
                 RoomDto.builder()
                         .id(room.getId())
