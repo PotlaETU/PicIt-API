@@ -111,8 +111,9 @@ public class UserProfileService {
     public ResponseEntity<String> updateHobbies(String username, List<Hobby> hobbies) {
         var userProfile = getUserProfile(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        userProfile.setHobbies(hobbies);
-        userProfileRepository.save(userProfile);
+        Query query = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Update update = new Update().set("hobbies", hobbies);
+        mongoTemplate.updateFirst(query, update, UserProfile.class);
         return ResponseEntity.ok().build();
     }
 

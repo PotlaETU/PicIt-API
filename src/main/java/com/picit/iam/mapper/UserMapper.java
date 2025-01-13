@@ -37,7 +37,7 @@ public interface UserMapper {
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "profilePicture", ignore = true)
     @Mapping(target = "bio", ignore = true)
-    @Mapping(target = "hobbies", ignore = true)
+    @Mapping(target = "hobbies", expression = "java(new java.util.ArrayList<>())")
     @Mapping(target = "follows", expression = "java(new java.util.ArrayList<>())")
     @Mapping(target = "followers", expression = "java(new java.util.ArrayList<>())")
     @Mapping(target = "blockedUsers", expression = "java(new java.util.ArrayList<>())")
