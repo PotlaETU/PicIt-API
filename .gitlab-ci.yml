@@ -18,7 +18,8 @@ before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
 
 services:
-  - dh-iutl.univ-artois.fr/mongo:5.0
+  - name: dh-iutl.univ-artois.fr/mongo:4.4
+    alias: mongo
 
 build:
   stage: build
