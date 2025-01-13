@@ -2,6 +2,8 @@ image: dh-iutl.univ-artois.fr/gradle:8.12.0-jdk-21-and-23-alpine
 
 variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  MONGODB_HOST: mongo
+  MONGODB_PORT: 27017
 
 stages:
   - build
@@ -16,7 +18,8 @@ before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
 
 services:
-  - dh-iutl.univ-artois.fr/mongo:8.0
+  - name: dh-iutl.univ-artois.fr/mongo:4.4
+    alias: mongo
 
 build:
   stage: build
@@ -43,6 +46,9 @@ test:
     paths:
       - build
       - .gradle
+  variables:
+    SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/PicIt
+
   dependencies:
     - build
   artifacts:
