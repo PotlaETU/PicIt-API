@@ -34,6 +34,7 @@ public class CommentService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
         Comment comment = commentMapper.commentRequestDtoToComment(commentRequestDto, userId);
+        comment.setUsername(username);
         var commentSaved = commentRepository.save(comment);
 
         Query query = new Query(Criteria.where("id").is(postId));
