@@ -333,9 +333,14 @@ public class UserProfileService {
 
     public UserProfileDto getProfileUsername(String username, String usernameToGet) {
         var profile = userProfileRepository.findByUsername(usernameToGet)
-                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+                .orElse(userRepository.findByUsername(usernameToGet)
+                        .map(u -> userProfileRepository.findByUserId(u.getId()))
+                        .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND)));
+
         var userToGet = userRepository.findByUsername(usernameToGet)
-                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+                .orElse(userRepository.findByUsername(usernameToGet)
+                        .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND)));
+
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
@@ -349,6 +354,10 @@ public class UserProfileService {
             return UserProfileDto.builder()
                     .bio(profile.getBio())
                     .username(profile.getUsername())
+                    .postCount(postRepository.countPostByUserId(profile.getUserId()))
+                    .followers(profile.getFollowers())
+                    .follows(profile.getFollows())
+                    .userId(profile.getUserId())
                     .build();
         }
 

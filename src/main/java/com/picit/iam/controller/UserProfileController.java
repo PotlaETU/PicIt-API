@@ -42,9 +42,9 @@ public class UserProfileController implements ProfileControllerDocumentation {
         return profileService.getProfilePicture(authentication.getName());
     }
 
-    @GetMapping("/picture/{username}")
-    public ResponseEntity<byte[]> getProfilePictureByUsername(Authentication authentication, @PathVariable("username") String username) {
-        return profileService.getProfilePictureUser(authentication.getName(), username);
+    @GetMapping("/picture/{userId}")
+    public ResponseEntity<byte[]> getProfilePictureByUsername(Authentication authentication, @PathVariable("userId") String userId) {
+        return profileService.getProfilePictureUser(authentication.getName(), userId);
     }
 
     @PostMapping
