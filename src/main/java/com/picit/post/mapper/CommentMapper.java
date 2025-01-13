@@ -12,7 +12,9 @@ public interface CommentMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-    Comment commentRequestDtoToComment(CommentRequestDto commentRequestDto, String userId);
+    @Mapping(target = "postId", source = "postId")
+    @Mapping(target = "username", ignore = true)
+    Comment commentRequestDtoToComment(CommentRequestDto commentRequestDto, String userId, String postId);
 
     CommentDto commentToCommentDto(Comment commentSaved);
 }

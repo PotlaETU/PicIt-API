@@ -33,7 +33,7 @@ public class CommentService {
                 .map(User::getId)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
-        Comment comment = commentMapper.commentRequestDtoToComment(commentRequestDto, userId);
+        Comment comment = commentMapper.commentRequestDtoToComment(commentRequestDto, userId, postId);
         comment.setUsername(username);
         var commentSaved = commentRepository.save(comment);
 
