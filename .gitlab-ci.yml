@@ -55,7 +55,6 @@ test:
       - .gradle
   variables:
     SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/PicIt
-
   dependencies:
     - build
   artifacts:
@@ -83,14 +82,13 @@ build-and-package:
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
       --destination "${URL_REGISTRE_IMAGE}/${IMAGE_DOCKER}"
     - gradle bootJar
-  dependencies:
-    - build
-  needs: [ "build" ]
+  needs: [ "build", "test" ]
   artifacts:
     paths:
       - build/libs/*.jar
     expire_in: 1 week
   only:
     - main
+    - develop
   when: manual
 
