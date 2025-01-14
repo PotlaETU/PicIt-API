@@ -61,8 +61,27 @@ test:
     reports:
       junit: build/test-results/test/**/TEST-*.xml
 
-build-and-package:
+build-api:
   stage: package
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: pull
+    paths:
+      - build
+      - .gradle
+  script:
+    - gradle bootJar
+  needs: [ "build", "test" ]
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+
+deploy-kaniko:
+  stage: deploy
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull
@@ -81,14 +100,8 @@ build-and-package:
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
       --destination "${URL_REGISTRE_IMAGE}/${IMAGE_DOCKER}"
-    - gradle bootJar
-  needs: [ "build", "test" ]
-  artifacts:
-    paths:
-      - build/libs/*.jar
-    expire_in: 1 week
+  needs: [ "build-bootjar" ]
   only:
     - main
     - develop
   when: manual
-
