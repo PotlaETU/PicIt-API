@@ -290,9 +290,7 @@ public class PostService {
         if (userProfile == null) {
             throw new UserNotFound(USER_NOT_FOUND);
         }
-        var user = userRepository.findByUsername(name)
-                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows(), user.getId()));
+        var query = new Query(PostCriteria.postsByUserId(userProfile.getUserId()));
         return getPostDtos(hobby, page, 10, query).getContent();
     }
 }
