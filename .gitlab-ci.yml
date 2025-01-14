@@ -100,7 +100,7 @@ deploy-kaniko:
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
       --destination "${URL_REGISTRE_IMAGE}/${IMAGE_DOCKER}"
-  needs: [ "build-bootjar" ]
+  needs: [ "build-api" ]
   only:
     - main
     - develop
