@@ -4,11 +4,18 @@ variables:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   MONGODB_HOST: mongo
   MONGODB_PORT: 27017
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  IMAGE_DOCKER: "anthony.rolland/picit-api:latest"
+  URL_REGISTRE_IMAGE: "reg-iutl.univ-artois.fr"
+  PORT: "8081"
+  URL_WEBSITE: "picit-main-api.$FQDN_IUT"
+
 
 stages:
   - build
   - test
   - package
+  - deploy
 
 default:
   tags:
@@ -55,21 +62,35 @@ test:
     reports:
       junit: build/test-results/test/**/TEST-*.xml
 
-package:
+build-and-package:
   stage: package
-  script:
-    - gradle bootJar
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: pull
     paths:
       - build
       - .gradle
+  image:
+    name: gcr.io/kaniko-project/executor:v1.18.0-debug
+    entrypoint: [ "" ]
+  script:
+    - echo "${NEXUS_USER}"
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${URL_REGISTRE_IMAGE}\":{\"auth\":\"$(printf "%s:%s" "${NEXUS_USER}" "${NEXUS_PASSWD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${URL_REGISTRE_IMAGE}/${IMAGE_DOCKER}"
+    - gradle bootJar
   dependencies:
     - build
+  needs: [ "build" ]
   artifacts:
     paths:
       - build/libs/*.jar
     expire_in: 1 week
   only:
     - main
+  when: manual
+
