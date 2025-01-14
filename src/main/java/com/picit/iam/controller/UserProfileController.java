@@ -102,5 +102,10 @@ public class UserProfileController implements ProfileControllerDocumentation {
     public ResponseEntity<String> addHobbies(Authentication authentication, @RequestBody List<Hobby> hobbies) {
         return profileService.updateHobbies(authentication.getName(), hobbies);
     }
+
+    @PostMapping("/bio")
+    public ResponseEntity<String> updateBio(Authentication authentication, @RequestBody UserProfileDto bio) {
+        return profileService.updateBio(authentication.getName(), bio);
+    }
 }
 

@@ -141,14 +141,13 @@ public class UserProfileService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         User userToGet = userRepository.findById(userIdToGet)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var userProfile = userProfileRepository.findByUserId(user.getId());
         var userProfileToGet = userProfileRepository.findByUserId(userToGet.getId());
 
         if (userProfileToGet.getBlockedUsers().contains(user.getId())) {
             return ResponseEntity.notFound().build();
         }
 
-        Image profilePic = userProfile.getProfilePicture();
+        Image profilePic = userProfileToGet.getProfilePicture();
         if (profilePic != null) {
             byte[] profilePicData = userProfileToGet
                     .getProfilePicture()
@@ -385,5 +384,14 @@ public class UserProfileService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
         Long postCount = postRepository.countPostByUserId(profile.getUserId());
         return userProfileMapper.toUserProfileDto(profile, points, postCount);
+    }
+
+    public ResponseEntity<String> updateBio(String name, UserProfileDto bio) {
+        var userProfile = getUserProfile(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        Query query = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Update update = new Update().set("bio", bio.bio());
+        mongoTemplate.updateFirst(query, update, UserProfile.class);
+        return ResponseEntity.ok().build();
     }
 }
