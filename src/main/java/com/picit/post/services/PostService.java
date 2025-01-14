@@ -27,7 +27,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.http.HttpStatus;
@@ -284,5 +283,16 @@ public class PostService {
         }
 
         return postMapper.postToPostDto(post);
+    }
+
+    public List<PostDto> getPostsByUsername(String name, String userId, String hobby, int page) {
+        var userProfile = userProfileRepository.findByUserId(userId);
+        if (userProfile == null) {
+            throw new UserNotFound(USER_NOT_FOUND);
+        }
+        var user = userRepository.findByUsername(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var query = new Query(PostCriteria.postsVisibility(userProfile.getFollows(), user.getId()));
+        return getPostDtos(hobby, page, 10, query).getContent();
     }
 }

@@ -37,6 +37,14 @@ public class PostController implements PostControllerDocumentation {
         return postService.getPosts(authentication.getName(), hobby, page);
     }
 
+    @GetMapping("/user/{userId}")
+    public List<PostDto> getPostsByUsername(Authentication authentication,
+                                  @PathVariable String userId,
+                                  @RequestParam(required = false, name = "hobby") String hobby,
+                                  @RequestParam(defaultValue = "0", name = "page") int page) {
+        return postService.getPostsByUsername(authentication.getName(), userId, hobby, page);
+    }
+
     @GetMapping("/{id}")
     public PostDto getPost(Authentication authentication, @PathVariable String id) {
         return postService.getPost(authentication.getName(), id);
