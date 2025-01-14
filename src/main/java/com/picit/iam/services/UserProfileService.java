@@ -199,7 +199,12 @@ public class UserProfileService {
         var userToBlock = userRepository.findById(userIdToBlock)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         Query query = new Query(Criteria.where("userId").is(userProfile.getUserId()));
-        Update update = new Update().addToSet("blockedUsers", userToBlock.getId());
+        Update update;
+        if (userProfile.getBlockedUsers().contains(userToBlock.getId())) {
+            update = new Update().pull("blockedUsers", userToBlock.getId());
+        } else {
+            update = new Update().addToSet("blockedUsers", userToBlock.getId());
+        }
         mongoTemplate.updateFirst(query, update, UserProfile.class);
         return ResponseEntity.ok().build();
     }

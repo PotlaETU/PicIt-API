@@ -12,6 +12,7 @@ public record UserProfileDto(
         List<Hobby> hobbies,
         List<String> follows,
         List<String> followers,
+        List<String> blockedUsers,
         String userId,
         Long postCount,
         int points

@@ -84,7 +84,8 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @PostMapping("/block")
-    public ResponseEntity<Void> blockUser(Authentication authentication, @RequestParam("userId") String userId) {
+    public ResponseEntity<Void> blockUser(Authentication authentication,
+                                          @RequestParam("userId") String userId) {
         return profileService.blockUser(authentication.getName(), userId);
     }
 
