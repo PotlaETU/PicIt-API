@@ -72,6 +72,12 @@ public class UserProfileController implements ProfileControllerDocumentation {
         return profileService.getFollowers(authentication.getName());
     }
 
+    @GetMapping("/followers/{username}")
+    public List<UserProfileDto> getFollowers(Authentication authentication,
+                                             @PathVariable(name = "username") String username) {
+        return profileService.getFollowers(authentication.getName(), username);
+    }
+
     @GetMapping("/following")
     public List<UserProfileDto> getFollowing(Authentication authentication) {
         return profileService.getFollowing(authentication.getName());

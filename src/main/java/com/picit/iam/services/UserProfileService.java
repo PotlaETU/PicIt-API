@@ -194,10 +194,10 @@ public class UserProfileService {
                 .toList();
     }
 
-    public ResponseEntity<Void> blockUser(String name, String usernameUserToBlock) {
+    public ResponseEntity<Void> blockUser(String name, String userIdToBlock) {
         var userProfile = getUserProfile(name)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        var userToBlock = userRepository.findByUsername(usernameUserToBlock)
+        var userToBlock = userRepository.findById(userIdToBlock)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         Query query = new Query(Criteria.where("userId").is(userProfile.getUserId()));
         Update update = new Update().addToSet("blockedUsers", userToBlock.getId());
@@ -240,6 +240,24 @@ public class UserProfileService {
         List<UserProfile> userFollows = new ArrayList<>();
         userProfile.getFollowers()
                 .forEach(s -> userFollows.add(userProfileRepository.findByUserId(s)));
+
+        return userFollows.stream()
+                .map(userProfileMapper::toUserProfileDto)
+                .toList();
+    }
+
+    public List<UserProfileDto> getFollowers(String name, String username) {
+        var userProfile = getUserProfile(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        var userProfileToGet = getUserProfile(username)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+        if (userProfileToGet.getBlockedUsers().contains(userProfile.getUserId())){
+            throw new UserNotFound(USER_NOT_FOUND);
+        }
+        List<UserProfile> userFollows = new ArrayList<>();
+        userProfileToGet.getFollowers()
+                .forEach(s -> userFollows.add(userProfileRepository.findByUserId(s)));
+
 
         return userFollows.stream()
                 .map(userProfileMapper::toUserProfileDto)
