@@ -101,7 +101,8 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @PostMapping("/hobbies")
-    public ResponseEntity<String> addHobbies(Authentication authentication, @RequestBody List<Hobby> hobbies) {
+    public ResponseEntity<String> addHobbies(Authentication authentication,
+                                             @RequestBody List<Hobby> hobbies) {
         return profileService.updateHobbies(authentication.getName(), hobbies);
     }
 
