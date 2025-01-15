@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 public record CommentDto(
         String id,
         String userId,
+        String username,
         String content,
         LocalDateTime createdAt
 ) {

@@ -42,9 +42,9 @@ public class UserProfileController implements ProfileControllerDocumentation {
         return profileService.getProfilePicture(authentication.getName());
     }
 
-    @GetMapping("/picture/{username}")
-    public ResponseEntity<byte[]> getProfilePictureByUsername(Authentication authentication, @PathVariable("username") String username) {
-        return profileService.getProfilePictureUser(authentication.getName(), username);
+    @GetMapping("/picture/{userId}")
+    public ResponseEntity<byte[]> getProfilePictureByUsername(Authentication authentication, @PathVariable("userId") String userId) {
+        return profileService.getProfilePictureUser(authentication.getName(), userId);
     }
 
     @PostMapping
@@ -72,13 +72,20 @@ public class UserProfileController implements ProfileControllerDocumentation {
         return profileService.getFollowers(authentication.getName());
     }
 
+    @GetMapping("/followers/{username}")
+    public List<UserProfileDto> getFollowers(Authentication authentication,
+                                             @PathVariable(name = "username") String username) {
+        return profileService.getFollowers(authentication.getName(), username);
+    }
+
     @GetMapping("/following")
     public List<UserProfileDto> getFollowing(Authentication authentication) {
         return profileService.getFollowing(authentication.getName());
     }
 
     @PostMapping("/block")
-    public ResponseEntity<Void> blockUser(Authentication authentication, @RequestParam("userId") String userId) {
+    public ResponseEntity<Void> blockUser(Authentication authentication,
+                                          @RequestParam("userId") String userId) {
         return profileService.blockUser(authentication.getName(), userId);
     }
 
@@ -88,13 +95,20 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @GetMapping("/points")
-    public UserProfileDto getPoints(Authentication authentication) {
-        return profileService.getPoints(authentication.getName());
+    public UserProfileDto getPoints(Authentication authentication,
+                                    @RequestParam(value = "userId", required = false) String userId) {
+        return profileService.getPoints(authentication.getName(), userId);
     }
 
     @PostMapping("/hobbies")
-    public ResponseEntity<String> addHobbies(Authentication authentication, @RequestBody List<Hobby> hobbies) {
+    public ResponseEntity<String> addHobbies(Authentication authentication,
+                                             @RequestBody List<Hobby> hobbies) {
         return profileService.updateHobbies(authentication.getName(), hobbies);
+    }
+
+    @PostMapping("/bio")
+    public ResponseEntity<String> updateBio(Authentication authentication, @RequestBody UserProfileDto bio) {
+        return profileService.updateBio(authentication.getName(), bio);
     }
 }
 
