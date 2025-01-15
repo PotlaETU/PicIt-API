@@ -311,13 +311,24 @@ public class UserProfileService {
         return suggestedUsers;
     }
 
-    public UserProfileDto getPoints(String name) {
-        var userId = getUser(name).getId();
-        var points = pointsRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
-        return UserProfileDto.builder()
-                .points(points.getPointsNb())
-                .build();
+    public UserProfileDto getPoints(String name, String userIdToGet) {
+        if (userIdToGet == null){
+            var userId = getUser(name).getId();
+            var points = pointsRepository.findByUserId(userId)
+                    .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
+            return UserProfileDto.builder()
+                    .points(points.getPointsNb())
+                    .build();
+        } else {
+            var user = userRepository.findById(userIdToGet
+            ).orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
+            var points = pointsRepository.findByUserId(user.getId())
+                    .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND_POINTS));
+            return UserProfileDto.builder()
+                    .username(user.getUsername())
+                    .points(points.getPointsNb())
+                    .build();
+        }
     }
 
     public UserProfileDto getProfile(String username) {

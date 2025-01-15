@@ -95,8 +95,9 @@ public class UserProfileController implements ProfileControllerDocumentation {
     }
 
     @GetMapping("/points")
-    public UserProfileDto getPoints(Authentication authentication) {
-        return profileService.getPoints(authentication.getName());
+    public UserProfileDto getPoints(Authentication authentication,
+                                    @RequestParam(value = "userId", required = false) String userId) {
+        return profileService.getPoints(authentication.getName(), userId);
     }
 
     @PostMapping("/hobbies")
