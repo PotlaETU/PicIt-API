@@ -44,10 +44,11 @@ public class UserProfileService {
     private final ProfilePicRepository profilePicRepository;
     private final RestTemplate restTemplate = new RestTemplateBuilder().build();
     private final PointsRepository pointsRepository;
-    private static final String USER_NOT_FOUND = "User not found";
-    private static final String USER_NOT_FOUND_POINTS = "Points for user not found";
     private final PostRepository postRepository;
     private final MongoTemplate mongoTemplate;
+    private static final String USER_ID = "userId";
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String USER_NOT_FOUND_POINTS = "Points for user not found";
 
     @Value("${generate-ai-images.uri}")
     private String urlAi;
@@ -111,7 +112,7 @@ public class UserProfileService {
     public ResponseEntity<String> updateHobbies(String username, List<Hobby> hobbies) {
         var userProfile = getUserProfile(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        Query query = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Query query = new Query(Criteria.where(USER_ID).is(userProfile.getUserId()));
         Update update = new Update().set("hobbies", hobbies);
         mongoTemplate.updateFirst(query, update, UserProfile.class);
         return ResponseEntity.ok().build();
@@ -198,7 +199,7 @@ public class UserProfileService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var userToBlock = userRepository.findById(userIdToBlock)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        Query query = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Query query = new Query(Criteria.where(USER_ID).is(userProfile.getUserId()));
         Update update;
         if (userProfile.getBlockedUsers().contains(userToBlock.getId())) {
             update = new Update().pull("blockedUsers", userToBlock.getId());
@@ -215,11 +216,11 @@ public class UserProfileService {
         var userToFollow = userRepository.findById(userIdToFollow)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
-        Query followerQuery = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Query followerQuery = new Query(Criteria.where(USER_ID).is(userProfile.getUserId()));
         Update followerUpdate = new Update().addToSet("follows", userIdToFollow);
         mongoTemplate.updateFirst(followerQuery, followerUpdate, UserProfile.class);
 
-        Query followedQuery = new Query(Criteria.where("userId").is(userToFollow.getId()));
+        Query followedQuery = new Query(Criteria.where(USER_ID).is(userToFollow.getId()));
         Update followedUpdate = new Update().addToSet("followers", userProfile.getUserId());
         mongoTemplate.updateFirst(followedQuery, followedUpdate, UserProfile.class);
 
@@ -255,7 +256,7 @@ public class UserProfileService {
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         var userProfileToGet = getUserProfile(username)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        if (userProfileToGet.getBlockedUsers().contains(userProfile.getUserId())){
+        if (userProfileToGet.getBlockedUsers().contains(userProfile.getUserId())) {
             throw new UserNotFound(USER_NOT_FOUND);
         }
         List<UserProfile> userFollows = new ArrayList<>();
@@ -274,11 +275,11 @@ public class UserProfileService {
         var userToUnfollow = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
 
-        Query followerQuery = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Query followerQuery = new Query(Criteria.where(USER_ID).is(userProfile.getUserId()));
         Update followerUpdate = new Update().pull("follows", userToUnfollow.getId());
         mongoTemplate.updateFirst(followerQuery, followerUpdate, UserProfile.class);
 
-        Query followedQuery = new Query(Criteria.where("userId").is(userToUnfollow.getId()));
+        Query followedQuery = new Query(Criteria.where(USER_ID).is(userToUnfollow.getId()));
         Update followedUpdate = new Update().pull("followers", userProfile.getUserId());
         mongoTemplate.updateFirst(followedQuery, followedUpdate, UserProfile.class);
 
@@ -394,7 +395,7 @@ public class UserProfileService {
     public ResponseEntity<String> updateBio(String name, UserProfileDto bio) {
         var userProfile = getUserProfile(name)
                 .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
-        Query query = new Query(Criteria.where("userId").is(userProfile.getUserId()));
+        Query query = new Query(Criteria.where(USER_ID).is(userProfile.getUserId()));
         Update update = new Update().set("bio", bio.bio());
         mongoTemplate.updateFirst(query, update, UserProfile.class);
         return ResponseEntity.ok().build();

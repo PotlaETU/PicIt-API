@@ -24,9 +24,11 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
     private final UserRepository userRepository;
-    private static final String COMMENT_NOT_FOUND = "Comment not found";
-    private static final String USER_NOT_FOUND = "User not found";
     private final MongoTemplate mongoTemplate;
+    private static final String COMENTS = "comments";
+    private static final String USER_NOT_FOUND = "User not found";
+    private static final String COMMENT_NOT_FOUND = "Comment not found";
+
 
     public CommentDto createComment(String username, CommentRequestDto commentRequestDto, String postId) {
         var userId = userRepository.findByUsername(username)
@@ -38,7 +40,7 @@ public class CommentService {
         var commentSaved = commentRepository.save(comment);
 
         Query query = new Query(Criteria.where("id").is(postId));
-        Update update = new Update().addToSet("comments", comment);
+        Update update = new Update().addToSet(COMENTS, comment);
         mongoTemplate.updateFirst(query, update, Post.class);
 
         return commentMapper.commentToCommentDto(commentSaved);
@@ -55,7 +57,7 @@ public class CommentService {
             return ResponseEntity.status(403).build();
         } else {
             Query query = new Query(Criteria.where("id").is(postId));
-            Update update = new Update().pull("comments", comment);
+            Update update = new Update().pull(COMENTS, comment);
             mongoTemplate.updateFirst(query, update, Post.class);
             commentRepository.deleteById(commentId);
             return ResponseEntity.ok().build();
@@ -75,7 +77,7 @@ public class CommentService {
         if (comment.getUserId().equals(userId)) {
             comment.setContent(commentRequestDto.content());
             Query query = new Query(Criteria.where("id").is(comment.getPostId()));
-            Update update = new Update().pull("comments", comment);
+            Update update = new Update().pull(COMENTS, comment);
             mongoTemplate.updateFirst(query, update, Post.class);
             var savedComment = commentRepository.save(comment);
             var commentDto = commentMapper.commentToCommentDto(savedComment);

@@ -287,8 +287,16 @@ public class PostService {
 
     public List<PostDto> getPostsByUsername(String name, String userId, String hobby, int page) {
         var userProfile = userProfileRepository.findByUserId(userId);
+        var user = userRepository.findByUsername(name)
+                .orElseThrow(() -> new UserNotFound(USER_NOT_FOUND));
         if (userProfile == null) {
             throw new UserNotFound(USER_NOT_FOUND);
+        }
+        if (userProfile.getUsername().equals(name)) {
+            return getPostsByUser(name, hobby, page);
+        }
+        if (userProfile.getBlockedUsers().contains(user.getId())) {
+            return List.of();
         }
         var query = new Query(PostCriteria.postsByUserId(userProfile.getUserId()));
         return getPostDtos(hobby, page, 10, query).getContent();
